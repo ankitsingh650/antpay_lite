@@ -6,8 +6,12 @@ import 'dart:convert';
 class HashService {
 //Find the test credentials from dev guide: https://devguide.payu.in/flutter-sdk-integration/getting-started-flutter-sdk/mobile-sdk-test-environment/
 //Keep the hash in backend for Security reasons.
-  static const merchantSalt = "g0nGFe03";// Add you Salt here.
-  static const merchantSecretKey = "";// Add Merchant Secrete Key - Optional
+ // static const merchantSalt = "PneK4FvRLMLXDdCZyvhiSv1Z2trfhWxJ";// Add you Salt here.
+  //static const merchantSecretKey = "LMQfIC";// Add Merchant Secrete Key - Optional
+
+
+  static const merchantSalt = "PneK4FvRLMLXDdCZyvhiSv1Z2trfhWxJ";// Add you Salt here.
+  static const merchantSecretKey = "LMQfIC";// Add Merchant Secrete Key - Optional
 
   static Map generateHash(Map response) {
 

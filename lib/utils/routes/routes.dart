@@ -20,7 +20,7 @@ class Routes {
       case RoutesName.login:
         return MaterialPageRoute(builder: (BuildContext) => const LoginView());
 
-      case RoutesName.dummy_dash:
+      case RoutesName.dashboard:
         return MaterialPageRoute(builder: (BuildContext) => const DummyDashboard());
 
       case RoutesName.paymentFrom:

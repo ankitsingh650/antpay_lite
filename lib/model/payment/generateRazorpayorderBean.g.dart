@@ -12,6 +12,7 @@ GenerateRazorpayorderModel _$GenerateRazorpayorderModelFromJson(
       amount: json['amount'] as String?,
       mobile: json['mobile'] as String?,
       service: json['service'] as String?,
+      channel: json['channel'] as String?,
     );
 
 Map<String, dynamic> _$GenerateRazorpayorderModelToJson(
@@ -20,6 +21,7 @@ Map<String, dynamic> _$GenerateRazorpayorderModelToJson(
       'amount': instance.amount,
       'mobile': instance.mobile,
       'service': instance.service,
+      'channel': instance.channel,
     };
 
 GenerateRazorpayorderBean _$GenerateRazorpayorderBeanFromJson(

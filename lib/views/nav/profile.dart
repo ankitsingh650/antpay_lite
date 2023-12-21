@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:antpay_lite/views/wallet/MinKyc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -141,7 +142,7 @@ class _ProfileState extends State<Profile> {
 
 
 
-                      ProfileListItemTile(
+                    /*  ProfileListItemTile(
                         imagePath: 'assets/images/my_account.png',
                         text: 'My Account',
                         onTap: () {
@@ -152,14 +153,14 @@ class _ProfileState extends State<Profile> {
                               sellerCredential['seller_identifier']
                                   .toString()
                                   .isNotEmpty) {
-                        /*    Navigator.pushNamed(
-                                context, RoutesName.seller_edit);*/
+                        *//*    Navigator.pushNamed(
+                                context, RoutesName.seller_edit);*//*
                           } else {
                             CommonUtils.showToast("Seller not Activated!");
                           }
                         },
                       ),
-                      Divider(height: 3, color: Colors.black12),
+                      Divider(height: 3, color: Colors.black12),*/
 
                       ProfileListItemTile(
                         imagePath: 'assets/images/my_account.png',
@@ -190,6 +191,9 @@ class _ProfileState extends State<Profile> {
                         text: 'Support -24x7 Help',
                         onTap: () {
                           print("Support");
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => MinKycScreen(),
+                          ));
                         },
                       ),
                       Divider(height: 3, color: Colors.black12),
@@ -210,8 +214,11 @@ class _ProfileState extends State<Profile> {
                           print("logout");
                           SessionManager().logOutUser();
                           UtilityPreferences().setString('isOnboarded', 'true');
-                          Navigator.of(context, rootNavigator: true)
-                              .pushReplacementNamed(RoutesName.login);
+
+                          Navigator.pushReplacementNamed(context, RoutesName.login);
+
+                        /*  Navigator.of(context, rootNavigator: true)
+                              .pushReplacementNamed(RoutesName.login);*/
                           // to push to new screen without bottom bar
                           // PersistentNavBarNavigator.pushNewScreen(
                           //   context,

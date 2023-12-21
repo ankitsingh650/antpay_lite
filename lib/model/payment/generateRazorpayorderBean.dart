@@ -7,6 +7,7 @@ class GenerateRazorpayorderModel {
     this.amount,
     this.mobile,
     this.service,
+    this.channel,
   });
 
   @JsonKey(name: 'amount')
@@ -17,7 +18,8 @@ class GenerateRazorpayorderModel {
 
   @JsonKey(name: 'service')
   String? service;
-
+  @JsonKey(name: 'channel')
+  String? channel;
 
 
 

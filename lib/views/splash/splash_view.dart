@@ -40,7 +40,7 @@ class _SplashViewState extends State<SplashView> {
       if(SessionManager().userLoggedIn()){
         // handle verifytoken() api call->true flow
         print('splash login');
-        Navigator.pushReplacementNamed(context, RoutesName.dummy_dash);
+        Navigator.pushReplacementNamed(context, RoutesName.dashboard);
         //else-> login flow
       }
       else{

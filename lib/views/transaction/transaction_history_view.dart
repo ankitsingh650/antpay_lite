@@ -416,7 +416,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
       actions: [
         TextButton(
             onPressed: () {
-              Navigator.pushReplacementNamed(context, RoutesName.dummy_dash);
+              Navigator.pushReplacementNamed(context, RoutesName.dashboard);
             },
             child: Text(
                 'DONE'

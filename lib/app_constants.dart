@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 
 class AppConstant {
 
+  static const appName=  'antpay_lite';
+
+
+
   static const Color colorPrimary = Color(0xEA5436AD);
   static const Color colorPrimaryDark = Color(0xFF432B8A);
 

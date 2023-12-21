@@ -17,7 +17,7 @@ class RoutesName {
   static const String update_profile = 'update_profile_view';
 
   //Dummy Dashboard
-  static const String dummy_dash = 'dummy_dash';
+ // static const String dummy_dash = 'dummy_dash';
 
   //Business Loan
   static const String business_loan = 'business_loan_view';

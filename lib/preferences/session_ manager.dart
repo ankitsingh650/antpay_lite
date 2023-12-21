@@ -563,6 +563,10 @@ class SessionManager{
     return _pref.getString(KEY_MOBILE);
    }
 
+   String? getUserEmail(){
+     return _pref.getString(KEY_EMAIL);
+   }
+
    String? getName(){
      return _pref.getString(KEY_NAME);
    }
@@ -1129,6 +1133,10 @@ class SessionManager{
     _pref.setString(LENDER_ID,lender_id);
    }
 
+   void addAntTxnId(String txn_id){
+     _pref.setString(AMOUNT_TRANSCATION_ID,txn_id);
+   }
+
    void addMessage(String message){
      _pref.setString(MESSAGE,message);
    }
@@ -1178,6 +1186,9 @@ class SessionManager{
 
 
 
+
+
+
    Map<dynamic, dynamic> getGenerateOrderResponse() {
 
      Map generateOrderDetailsGet = {
@@ -1204,6 +1215,10 @@ class SessionManager{
 
    String? getSuccessOrderId(){
      return _pref.getString(SUCCESS_ORDER_ID);
+   }
+
+   String? getAntTxnId(){
+     return _pref.getString(AMOUNT_TRANSCATION_ID)??'null';
    }
 
    String? getPaymentId(){

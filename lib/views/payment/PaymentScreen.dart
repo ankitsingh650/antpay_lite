@@ -4,8 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/retrofit/auth.dart';
 import '../../model/payment/generateRazorpayorderBean.dart';
 import '../../preferences/session_ manager.dart';
+import '../../repository/common/common_api_repo.dart';
+import 'PayuPaymentScreen.dart';
 
 class BillPaymentScreen extends StatefulWidget {
   const BillPaymentScreen({super.key});
@@ -22,7 +25,6 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
 
   var paymentMethod = 0;
   TextEditingController _amountController = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +71,8 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
                           ),
                         ),
                         Text(
-                          '₹ ${_amountController.text}', // You may replace this with your actual value
+                          '₹ ${_amountController.text}',
+                          // You may replace this with your actual value
                           style: TextStyle(
                             fontFamily: 'rupee_ford',
                             color: Colors.black,
@@ -79,7 +82,6 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: 4.0),
                     TextField(
                       controller: _amountController,
@@ -139,7 +141,7 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
                     },
                   ),
                   Divider(height: 1.0, color: Colors.grey),*/
-                  RadioListTile(
+                  /*  RadioListTile(
                     title: Text(
                       'Pay Using UPI',
                       style: TextStyle(fontSize: 16.0),
@@ -154,7 +156,7 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
                       // Handle radio button selection
                     },
                   ),
-                  Divider(height: 1.0, color: Colors.grey),
+                  Divider(height: 1.0, color: Colors.grey),*/
                   RadioListTile(
                     title: Text(
                       'Pay Using Debit/Credit Card, Net Banking, Wallet or UPI ID',
@@ -216,7 +218,6 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
                             ),
                           ),
                         ),
-
                         InkWell(
                           onTap: () {
                             // Handle view details action
@@ -247,6 +248,10 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
                         } else if (selection == 3) {
                           fetchAPIKey();
                         } else {
+                          /*  Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => PayuPaymentScreen(),
+                          ));
+*/
                           generateRazorpayorder();
                         }
 
@@ -272,12 +277,12 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
     );
   }
 
-
   Widget _buildAmountSuggestion(String amount) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _amountController.text = amount.replaceAll('₹ ', ''); // Update the text field
+          _amountController.text =
+              amount.replaceAll('₹ ', ''); // Update the text field
         });
       },
       child: Container(
@@ -343,33 +348,45 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
   }
 
   Future<void> generateRazorpayorder() async {
-    GenerateRazorpayorderModel data = GenerateRazorpayorderModel(
-        amount: "1", mobile: '8006034041', service: 'bill');
+    CommonApiRepo repoClass = CommonApiRepo();
 
-    generateRazorpayorderBeana =
-        await generateRazorpayorderIN.generateRazorpayorder(data);
-    // for(getOperator result in getOperatorw){
+    GenerateRazorpayorderModel data = GenerateRazorpayorderModel(
+        amount: "1",
+        mobile: SessionManager().getMobile(),
+        service: 'ppi-wallet',
+        channel: 'PG');
+
+    generateRazorpayorderBeana = await repoClass.apiClient
+        .generateRazorpayorder(data, AuthToken.getAuthToken(),
+            SessionManager().getToken().toString());
+
+    print(generateRazorpayorderBeana.ant_txn_id.toString());
+    SessionManager().addAntTxnId(generateRazorpayorderBeana.ant_txn_id.toString());
+
     print('Response--->');
-    print("ant_txn_id : ${generateRazorpayorderBeana.ant_txn_id}");
+    print("ant_txn_id : ${generateRazorpayorderBeana.ant_txn_id.toString()}");
     print("api_key : ${generateRazorpayorderBeana.api_key}");
     print("order_id : ${generateRazorpayorderBeana.order_id}");
     print("msg : ${generateRazorpayorderBeana.msg}");
 
-    SessionManager().addGnerateOrderResponse(
+   /* SessionManager().addGnerateOrderResponse(
         generateRazorpayorderBeana.order_id.toString(),
         generateRazorpayorderBeana.api_key.toString(),
         generateRazorpayorderBeana.ant_txn_id.toString(),
         "",
         "",
-        "");
+        "");*/
 
-    /* setState(() {
-      RazorpaySingleton().makePayment(
+    setState(() {
+      /* RazorpaySingleton().makePayment(
           generateRazorpayorderBeana.api_key,
           generateRazorpayorderBeana.order_id,
-          generateRazorpayorderBeana.ant_txn_id,context);
+          generateRazorpayorderBeana.ant_txn_id,context);*/
 
-    });*/
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => PayuPaymentScreen(),
+      ));
+    });
 
     // }
     setState(() {});
