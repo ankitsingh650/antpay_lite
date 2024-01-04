@@ -21,6 +21,34 @@ class _APIClient implements APIClient {
   String? baseUrl;
 
   @override
+  Future<UsernameResponse> getUsername(UsernameRequest request) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<UsernameResponse>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'antapp/getname',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = UsernameResponse.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<OTPBean> otp(OTPRequestModel dataPost) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -189,6 +217,298 @@ class _APIClient implements APIClient {
               baseUrl,
             ))));
     final value = GenerateRazorpayorderBean.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<ProfileUpdateResponseModel> profileUpdate(
+    String authValue,
+    String oAuthTokenValue,
+    ProfileUpdateRequestModel dataProfile,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      r'oath_token': authValue,
+      r'Authorization': oAuthTokenValue,
+    };
+    _headers.removeWhere((k, v) => v == null);
+    final _data = <String, dynamic>{};
+    _data.addAll(dataProfile.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<ProfileUpdateResponseModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'antapp/updateProfile',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = ProfileUpdateResponseModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<RegUserResponseModel> regUserMobile(
+    String oAuthTokenValue,
+    String authValue,
+    RegUserRequestModel dataProfile,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      r'Authorization': oAuthTokenValue,
+      r'oath_token': authValue,
+    };
+    _headers.removeWhere((k, v) => v == null);
+    final _data = <String, dynamic>{};
+    _data.addAll(dataProfile.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<RegUserResponseModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'ppi/reguser',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = RegUserResponseModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<RegUserResponseModel> mOtpVerify(
+    String oAuthTokenValue,
+    String authValue,
+    RegUserVerifyRequestModel dataProfile,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      r'Authorization': oAuthTokenValue,
+      r'oath_token': authValue,
+    };
+    _headers.removeWhere((k, v) => v == null);
+    final _data = <String, dynamic>{};
+    _data.addAll(dataProfile.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<RegUserResponseModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'ppi/verifymotp',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = RegUserResponseModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<PanKYCResponseModel> minKycaadhar(
+    String oAuthTokenValue,
+    String authValue,
+    AadhaarCardRequest dataProfile,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      r'Authorization': oAuthTokenValue,
+      r'oath_token': authValue,
+    };
+    _headers.removeWhere((k, v) => v == null);
+    final _data = <String, dynamic>{};
+    _data.addAll(dataProfile.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<PanKYCResponseModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'ppi/reguser_minkyc_aadhar',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = PanKYCResponseModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<TransactionHistoryResponseModel> transaction(
+    String authValue,
+    String oAuthTokenValue,
+    TransactionHistoryRequestModel dataProfile,
+  ) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      r'oath_token': authValue,
+      r'Authorization': oAuthTokenValue,
+    };
+    _headers.removeWhere((k, v) => v == null);
+    final _data = <String, dynamic>{};
+    _data.addAll(dataProfile.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<TransactionHistoryResponseModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'antapp/appTransaction',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = TransactionHistoryResponseModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<HomebannerModel> Homebanner() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<HomebannerModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'offers/offersapi/homebanner',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = HomebannerModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<OfferDetailsResponse> fetchOfferDetails(
+      OfferDetailsRequest data) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(data.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<OfferDetailsResponse>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'offers/offersapi/getOfferdetails',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = OfferDetailsResponse.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<OfferResponse> getOffers() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<OfferResponse>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'offers/offersapi/getHomeoffers_by_Categories_V1',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = OfferResponse.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<OfferDetailsByCategoryResponse> fetchOfferByCategory(
+      OfferDetailsByCategoryRequest data) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(data.toJson());
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<OfferDetailsByCategoryResponse>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'offers/offersapi/getOffersbycategory',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = OfferDetailsByCategoryResponse.fromJson(_result.data!);
     return value;
   }
 

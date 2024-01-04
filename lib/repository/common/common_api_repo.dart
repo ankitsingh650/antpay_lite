@@ -15,31 +15,13 @@ class CommonApiRepo{
 
   CommonApiRepo() {
     Dio dio = Dio();
-    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true, requestHeader: true));
     apiClient = APIClient(dio);
     apiClientTest = APIClientTest(Dio());
 
 
   }
 
-
-
-
-
-
-
-
-
-
-
-
- /* Future<dynamic> fetchTransaction(String oAuthToken, String auth, fetchStatementRequestModel requestData) async{
-
-    fetchStatementResponseModel responseModel= await apiClient.fetchSellerTransactions(oAuthToken, auth, requestData);
-    print(':::Status->${responseModel.status}\nResponse Code->${responseModel.responseCode}\nMsg->${responseModel.responseMessage}');
-
-    return responseModel;
-  }*/
 
   Future<dynamic> getNotifications(String mobile) async {
     FetchNotificationRequestModel requestModel = FetchNotificationRequestModel(

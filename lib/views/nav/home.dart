@@ -8,13 +8,14 @@ import 'package:antpay_lite/model/wallet/GetBankDetailsResponseModel.dart';
 import 'package:antpay_lite/model/wallet/WalletBalanceRequestModel.dart';
 import 'package:antpay_lite/model/wallet/WalletBalanceResponseModel.dart';
 import 'package:antpay_lite/views/payment/PaymentScreen.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:provider/provider.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 import '../../data/retrofit/auth.dart';
+import '../../model/offer/homebanner.dart';
+import '../../model/offer/offers_model.dart';
 import '../../model/wallet/GetBankDetailsRequestModel.dart';
 import '../../preferences/session_ manager.dart';
 import '../../repository/common/common_api_repo.dart';
@@ -25,6 +26,7 @@ import '../../utils/routes/routes_name.dart';
 import '../../utils/widgets/reusables.dart';
 
 import '../transaction/notification_history.dart';
+import '../wallet/MinVerifyMobile.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -37,6 +39,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isFrontVisible = true;
+
+
+  List<Bannerlist> bannerList=[];
+  late List<Offer>? offersList=[];
+  late List<Results>? offerResultList=[];
+  bool offerViewStatus=false;
 
   final List<IconData> icons = [
     Icons.account_balance,
@@ -74,26 +82,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   GlobalKey globalKeyQR = new GlobalKey();
   GlobalKey globalKeyShareQR = new GlobalKey();
 
-  // late SellerDetails? sellerDetails;
-
-  // late List<Schemes>? responseSchemsList;
-  // late KycStatus kycdata;
+  int _currentStep = 0;
+  PageController _pageController = PageController();
 
   var investmentViewModel;
-
-  void _onButtonPressedApplyLoan() {
-    //  _checkLoans();
-    // Navigator.pushNamed(context, RoutesName.business_loan);
-  }
-
-  void _onButtonPressedApplyInvevestment() {
-    print("apply Investment");
-    // Navigator.pushNamed(context, RoutesName.collection);
-    //Text to Speech
-    // TextToSpeech tts = TextToSpeech();
-    // tts.speak("Hello, world!");
-    // _getInvestmentSchemes();
-  }
 
   @override
   void dispose() {
@@ -112,11 +104,71 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     _initBalance();
     _fetchCardDetail();
     _fetchAccountDetail();
+    _initOffers();
+    _initOfferDetails();
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
     );
     _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+  }
+
+  void _initOffers() async{
+    CommonApiRepo repoClass = CommonApiRepo();
+    OfferResponse response = await repoClass.apiClient.getOffers();
+    if (response.status.toString() == "1") {
+      offerResultList=response.results;
+      if(offerResultList!.isEmpty){
+        setState(() {
+          offerViewStatus=false;
+
+        });
+      }
+      else{
+        setState(() {
+          offerViewStatus=true;
+          if(offersList!.isNotEmpty){
+            offersList!.clear();
+          }
+          for (Results result in offerResultList!) {
+            print(result.imgURL);
+
+            List<Offer>? currentResultOfferList=result!.offer;
+            for(Offer offer in currentResultOfferList!){
+              Offer currOffer=Offer(
+                id: offer.id,
+                offerName: offer.offerName,
+                offerType: offer.offerType,
+                couponCodeType: offer.couponCodeType,
+                offerIconImg: offer.offerIconImg,
+                offerBannerImg: "${result.imgURL}${offer.offerBannerImg}",
+                companyIconImg: offer.companyIconImg,
+                offerUrl: offer.offerUrl,
+                appId: offer.appId,
+                playStoreURL: offer.playStoreURL,
+                status: offer.status,
+              );
+              offersList?.add(currOffer);
+            }
+          }
+          print("no of offers: ${offersList?.length}");
+        });
+      }
+    }
+  }
+
+  void _initOfferDetails() async {
+    CommonApiRepo repoClass = CommonApiRepo();
+    HomebannerModel response;
+    response = await repoClass.apiClient.Homebanner();
+    if (response.status.toString() == "1") {
+      print('Response:${response.banner_list}');
+      setState(() {
+        bannerList=response.banner_list!;
+      });
+    } else {
+
+    }
   }
 
   void _toggleCard() {
@@ -138,10 +190,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         backgroundColor: ColorPalette.baseBackgroundColor,
         body: SafeArea(
           child: Container(
+            color: ColorPalette.white,
             height: double.infinity,
-            width: double.infinity,
             child: SingleChildScrollView(
               child: Column(children: [
+
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Container(
@@ -169,12 +222,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                       onTap: () {
                                         switch (index) {
                                           case 2:
-
-                                            Navigator.of(context).push(MaterialPageRoute(
-                                              builder: (context) => BillPaymentScreen(),
+                                            Navigator.of(context)
+                                                .push(MaterialPageRoute(
+                                              builder: (context) =>
+                                                  BillPaymentScreen(),
                                             ));
-                                            // Navigator.pushReplacementNamed(context, RoutesName.paymentFrom);
-                                           /* PersistentNavBarNavigator
+                                          // Navigator.pushReplacementNamed(context, RoutesName.paymentFrom);
+                                          /* PersistentNavBarNavigator
                                                 .pushNewScreen(
                                               context,
                                               screen: BillPaymentScreen(),
@@ -221,207 +275,133 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     ),
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Container(
+                    height: 80, // Adjust the height as needed
+                    child: Stepper(
+                      physics: PageScrollPhysics(),
+                      onStepTapped: (value) {},
+                      type: StepperType.horizontal,
+                      currentStep: _currentStep,
+                      onStepContinue: () {
+                        if (_currentStep < 4) {
+                          _pageController.nextPage(
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.ease,
+                          );
+                        }
+                      },
+                      onStepCancel: () {
+                        if (_currentStep > 0) {
+                          _pageController.previousPage(
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.ease,
+                          );
+                        }
+                      },
+                      steps: [
 
-                /*  Card(
-                  color: Colors.white,
-                  surfaceTintColor: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'A/c Balance',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                            Text(
-                              'Account Number',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                          ],
+
+                        Step(
+                          state: StepState.complete,
+
+                          title: Text('Step 1'),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Account Setup'),
+                              // Add more widgets as needed
+                            ],
+                          ),
+                          isActive: _currentStep == 0,
                         ),
-                        SizedBox(
-                          height: 5.0,
+                        Step(
+                          title: Text('Step 2'),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Account Setup'),
+                              // Add more widgets as needed
+                            ],
+                          ),
+                          isActive: _currentStep == 1,
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              balance.isEmpty ? "00" : '\u{20B9} ${balance}',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              accountNumber,
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                        Step(
+                          title: Text('Step 3'),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Account Setup'),
+                              // Add more widgets as needed
+                            ],
+                          ),
+                          isActive: _currentStep == 2,
                         ),
-                        SizedBox(
-                          height: 8.0,
+                        Step(
+                          title: Text('Step 4'),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Account Setup'),
+                              // Add more widgets as needed
+                            ],
+                          ),
+                          isActive: _currentStep == 3,
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'IFSC',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                            Text(
-                              'Card Number',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 5.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              ifscCode,
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              cardNumber,
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 8.0,
-                        ),
-                        Container(
-                          height: 1.0,
-                          color: ColorPalette.colorPrimary,
-                        ),
-                        SizedBox(
-                          height: 8.0,
-                        ),
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Set Transaction Limit',
-                                  style: TextStyle(
-                                    fontFamily: 'rupee_ford',
-                                    color: ColorPalette.colorPrimary,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Transaction History',
-                                  style: TextStyle(
-                                    fontFamily: 'rupee_ford',
-                                    color: ColorPalette.colorPrimary,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 8.0,
-                        ),
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Card Activate/Deactivate',
-                                  style: TextStyle(
-                                    fontFamily: 'rupee_ford',
-                                    color: ColorPalette.colorPrimary,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Set/Reset Pin',
-                                  style: TextStyle(
-                                    fontFamily: 'rupee_ford',
-                                    color: ColorPalette.colorPrimary,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Image.asset(
-                              'assets/images/powered_by.png',
-                              height: 60.0,
-                              width: 120.0,
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                'View Virtual Card',
-                                style: TextStyle(
-                                  fontFamily: 'rupee_ford',
-                                  color: ColorPalette.colorPrimary,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ),
-                          ],
+                        Step(
+                          title: Text('Step 5'),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Account Setup'),
+                              // Add more widgets as needed
+                            ],
+                          ),
+                          isActive: _currentStep == 4,
                         ),
                       ],
                     ),
                   ),
-                ),*/
-
+                ),
+                Container(
+                  height: 200,
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentStep = index;
+                      });
+                    },
+                    children: [
+                      Container(
+                        child: StepCard(
+                          title: 'Step 1: Account Setup',
+                          content: 'Set up your account for wallet activation.',
+                        ),
+                      ),
+                      StepCard(
+                        title: 'Step 2: KYC Verification',
+                        content: 'Complete KYC verification for security.',
+                      ),
+                      StepCard(
+                        title: 'Step 3: Activation Complete',
+                        content:
+                        'Congratulations! Your wallet is now activated.',
+                      ),
+                      StepCard(
+                        title: 'Step 4: Activation Complete',
+                        content:
+                        'Congratulations! Your wallet is now activated.',
+                      ),
+                      StepCard(
+                        title: 'Step 5: Activation Complete',
+                        content:
+                        'Congratulations! Your wallet is now activated.',
+                      ),
+                    ],
+                  ),
+                ),
                 Container(
                   padding: const EdgeInsets.all(8),
                   child: GestureDetector(
@@ -439,342 +419,204 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ),
                 ),
 
-                // ------>QR Card View End
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20,bottom: 10),
+                    child: Text(
 
-                /*  Container(
-                  margin: EdgeInsets.only(top: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                      top: BorderSide(
-                        color: ColorPalette.bottomIconSelectedColor,
-                        width: 3,
-                      ),
-                      bottom: BorderSide(
-                        color: Colors.red,
-                        width: 3,
+                      'Top Recommendations',
+                      style: TextStyle(
+                        fontFamily: 'rupee_ford',
+                        color: Colors.black,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  child: Column(children: [
-                    Text(
-                      'Follow Us on',
-                      textAlign: TextAlign.center,
+                ),
+                CarouselSlider(
+                  options: CarouselOptions(
+                    enlargeCenterPage: true,
+                    autoPlay: bannerList?.length == 1 ? false : true, // Set autoPlay based on the length of offersList
+                    aspectRatio: 16 / 9,
+                    autoPlayCurve: Curves.fastOutSlowIn,
+                    enableInfiniteScroll: bannerList?.length == 1 ? false : true,
+                    autoPlayAnimationDuration: Duration(milliseconds: 800),
+                    viewportFraction: 1, ),
+                  items: bannerList ?.map((offer) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return InkWell(
+                          onTap: (){
+                            print('offer click id: ${offer.id}');
+                            //Navigator.pushNamed(context, RoutesName.offer_view, arguments: offer);
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(left: 16, right: 16, bottom: 16,),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                                child: Image.network(
+                                  offer.banner_img??'',
+                                  fit: BoxFit.fill,
+                                  loadingBuilder: (BuildContext context, Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        color: ColorPalette.nextButtonColor,
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                                    return Container(
+                                        height: 140,
+                                        width: MediaQuery.of(context).size.width,
+                                        margin: EdgeInsets.only(left: 16, right: 16, bottom: 16,),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(Radius.circular(18)),
+                                            color: CommonUtils.toColor('#CCCCCC'),
+                                            border: Border.all(
+                                              color: Colors.blueGrey, // Set your desired border color
+                                              width: 1, // Set the width of the border
+                                            )
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                              textAlign:TextAlign.center,
+                                              'Error loading image... Sorry for the inconvenience!',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.normal,
+                                                color: Colors.black,
+                                              )
+                                          ),
+                                        )
+                                    );
+
+                                    //   Image.asset(
+                                    //   'assets/images/surge_banner.png', // Replace with the path to your default image asset.
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover, // Adjust the fit as needed.
+                                    // );
+                                  },
+                                ),
+                              )
+                          ),
+                        );;
+                      },
+                    );
+                  }).toList(),
+                ),
+
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20,bottom: 10),
+                    child: Text(
+                      'Antpay Offer',
                       style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        decorationThickness: 2,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'rupee_ford',
                         color: Colors.black,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: GestureDetector(
-                           */ /* onTap: () => CommonMethodUtils().linkLanuchInBrowser(urlFacebook),
-                            child: Image.asset(
-                              'assets/images/fb_icon.png',
-                              height: 50,
-                              width: 50,
-                            ),*/ /*
+                  ),
+                ),
+                offersList!.isEmpty?Container():
+                CarouselSlider(
+                  options: CarouselOptions(
+                    enlargeCenterPage: true,
+                    autoPlay: offersList?.length == 1 ? false : true, // Set autoPlay based on the length of offersList
+                    aspectRatio: 16 / 9,
+                    autoPlayCurve: Curves.fastOutSlowIn,
+                    enableInfiniteScroll: offersList?.length == 1 ? false : true,
+                    autoPlayAnimationDuration: Duration(milliseconds: 800),
+                    viewportFraction: 1, ),
+                  items: offersList?.map((offer) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return InkWell(
+                          onTap: (){
+                            print('offer click id Anpay: ${offer.id}');
+                            Navigator.pushNamed(context, RoutesName.offer_view_name, arguments: offer);
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(left: 16, right: 16, bottom: 16,),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                                child: Image.network(
+                                  offer.offerBannerImg??'',
+                                  fit: BoxFit.fill,
+                                  loadingBuilder: (BuildContext context, Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        color: ColorPalette.nextButtonColor,
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                                    return Container(
+                                        height: 140,
+                                        width: MediaQuery.of(context).size.width,
+                                        margin: EdgeInsets.only(left: 16, right: 16, bottom: 16,),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(Radius.circular(18)),
+                                            color: CommonUtils.toColor('#CCCCCC'),
+                                            border: Border.all(
+                                              color: Colors.blueGrey, // Set your desired border color
+                                              width: 1, // Set the width of the border
+                                            )
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                              textAlign:TextAlign.center,
+                                              'Error loading image... Sorry for the inconvenience!',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.normal,
+                                                color: Colors.black,
+                                              )
+                                          ),
+                                        )
+                                    );
+
+                                    //   Image.asset(
+                                    //   'assets/images/surge_banner.png', // Replace with the path to your default image asset.
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover, // Adjust the fit as needed.
+                                    // );
+                                  },
+                                ),
+                              )
                           ),
-                        ),
-                      */ /*  Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: GestureDetector(
-                            onTap: () => CommonMethodUtils()
-                                .linkLanuchInBrowser(urlTwitter),
-                            child: Image.asset(
-                              'assets/images/twitter_icon.png',
-                              height: 50,
-                              width: 50,
-                            ),
-                          ),
-                        ),*/ /*
-                      */ /*  Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: GestureDetector(
-                            onTap: () => CommonMethodUtils()
-                                .linkLanuchInBrowser(urlLinkedln),
-                            child: Image.asset(
-                              'assets/images/linkedin_icon.png',
-                              height: 50,
-                              width: 50,
-                            ),
-                          ),
-                        ),*/ /*
-                      ],
-                    ),
-                    Text(
-                      'CIN: U67200HR2012PTC046705 |  Email ID: support@antworksmoney.com |  Copyrights © Antworks Money 2017-2021.All Rights Reserved.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ]),
-                ),*/
+                        );;
+                      },
+                    );
+                  }).toList(),
+                ),
+
               ]),
             ),
           ),
         ));
-  }
-
-  void _getSellerDetails() async {
-    CommonApiRepo repoClass = CommonApiRepo();
-
-    /*  late MerchantDetails details;
-    MerchantDataModel data = await repoClass.fetchMerchantDetails(SessionManager().getToken().toString(), AuthToken.getAuthToken(), SessionManager().getMobile().toString());
-
-    if (data.status.toString() == "1") {
-      details = data.details!;
-      sellerDetails = data.sellerDetails;
-
-      if (sellerDetails != null) {
-        print(sellerDetails.toString());
-        if(sellerDetails!.qrStringStatus.toString()=='0'){
-          setState(() {
-            print('Seller under verification process');
-            merchantStatus=false;
-          });
-        }
-        else{
-          print('Seller verification done');
-          merchantStatus=true;
-        }
-      } else {
-        CommonUtils.showToast("Seller not Activated!");
-      }
-    }*/
-  }
-
-  Future<void> _captureAndSharePng() async {
-    if (!qrData!.isEmpty) {
-      /*   try {
-        RenderRepaintBoundary boundary = globalKeyQR.currentContext!
-            .findRenderObject() as RenderRepaintBoundary;
-
-        // capturing the QR image
-        var image = await boundary.toImage();
-        ByteData? byteData =
-            await image.toByteData(format: ImageByteFormat.png);
-        Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-        //app directory for storing images.
-        // final appDir = await getApplicationDocumentsDirectory();
-        final tempDir = await getTemporaryDirectory();
-        final file = await new File('${tempDir.path}/qr_image.png').create();
-        //appending data as bytes
-        await file.writeAsBytes(pngBytes);
-
-        // final channel = const MethodChannel('channel:me.alfian.share/share');
-        // channel.invokeMethod('shareFile', 'image.png');
-
-        //Sharing QR
-        await Share.shareFiles(
-          [file!.path],
-          mimeTypes: ["image/png"],
-          text: "Share the QR Code",
-        );
-      } catch (e) {
-        print(e.toString());
-      }
-    } else {
-      CommonUtils.showToast("Invalid QR!");
-    }*/
-    }
-
-    void _initQRData() async {
-      CommonApiRepo repoClass = CommonApiRepo();
-      /* FetchQrRequestModel request =
-        FetchQrRequestModel(mobile: SessionManager().getMobile().toString());
-
-    FetchQrResponseModel response;
-    if(EnvironmentConfig().envStatus.toString()=='PROD'){
-      print('Fetch QR call production');
-      response =
-      await repoClass.fetchQR(SessionManager().getToken().toString(), AuthToken.getAuthToken(),  request);
-    }
-    else {
-      print('Fetch QR call dev');
-      response =
-      await repoClass.fetchQR_UAT(AuthToken.getAuthToken(), request);
-    }
-
-    if (response.status.toString() == "SUCCESS") {
-      switch (response.responseCode) {
-        case "P001":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P002":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P005":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P006":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS004":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS026":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS030":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "00":
-          setState(() {
-            qrData = response.qrString.toString();
-            id=response.vpa.toString();
-            name=response.qrString.toString().split('pn=')[1];
-            activated = true;
-          });
-          break;
-        default:
-          CommonUtils.showFlushBar("Network Error!", context);
-      }
-    } else {
-      CommonUtils.showToast(response.responseMessage.toString());
-      qrData = "";
-    }*/
-    }
-
-    void _initBalance() async {
-      CommonApiRepo repoClass = CommonApiRepo();
-      /* FetchSellerBalanceRequestModel request = FetchSellerBalanceRequestModel(
-        mobile: SessionManager().getMobile().toString());
-
-    FetchSellerBalanceResponseModel response;
-
-    if(EnvironmentConfig().envStatus.toString()=='PROD'){
-      print('Fetch Balance call production');
-      response =
-      await repoClass.fetchBalance(SessionManager().getToken().toString(), AuthToken.getAuthToken(), request);
-    }
-    else {
-      print('Fetch Balance call dev');
-      response =
-      await repoClass.fetchBalance_UAT(AuthToken.getAuthToken(), request);
-    }
-
-
-    if (response.status.toString() == "SUCCESS") {
-      switch (response.responseCode) {
-        case "P001":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P002":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P005":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P006":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS004":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS026":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS031":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "00":
-          print(
-              'Response:${response.currentBalance}\n${response.withdrawableBalance}\n${response.monthlyLimitUtilized}');
-          setState(() {
-            List amount = response.currentBalance.toString().split(".");
-            balance = amount[0];
-            balanceDecimal = amount[1];
-          });
-          break;
-        default:
-          CommonUtils.showFlushBar("Server Error!", context);
-      }
-    } else {
-      //handle if not registered as seller
-    }*/
-    }
-
-    void _checkLoans() async {
-      print(SessionManager().getMobile().toString());
-      /*  LoanHistoryRequestModel requestModel= LoanHistoryRequestModel(
-        mobile: SessionManager().getMobile().toString(),
-        source: 'Bizhub'
-    );
-
-    CommonApiRepo repoClass = CommonApiRepo();
-    LoanHistoryResponseModel response = await repoClass.fetchLoanHistory(SessionManager().getToken().toString(), AuthToken.getAuthToken(), requestModel);
-
-    if(response.status.toString()=="1"){
-      Navigator.pushNamed(context, RoutesName.business_loan_history);
-    }
-    else{
-      Navigator.pushNamed(context, RoutesName.business_loan);
-    }*/
-    }
-
-/*  Future openShareQRDialog(bool isShare) => showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0)), //this right here
-            child: MerchantQR(globalKeyShareQR, qrData??'Unknown', id??'Loading...', name??'Loading...', isShare, false, '')
-        );
-      });*/
-
-    void _initMerchantCount() async {
-      CommonApiRepo repoClass = CommonApiRepo();
-      /* MerchantCount response = await repoClass.fetchMerchantCount(SessionManager().getToken().toString(), AuthToken.getAuthToken());
-    if(response.status.toString()=="1"){
-      setState(() {
-        count=response.merchantCount.toString();
-      });
-    }*/
-    }
-
-    Future<void> _getInvestmentSchemes() async {
-      //   investmentViewModel.setLoading(true);
-/*    SchemesInvestmentResponseModel schemesInvestmentResponseModel =
-    await investmentViewModel.getInvestmentSchemes();
-    responseSchemsList = schemesInvestmentResponseModel.schemesList;
-    //  this flow executes on the scheme api response kycStatus step according
-
-
-    kycdata = schemesInvestmentResponseModel.kyc_status!;
-    setState(() {
-      if (kycdata.step.toString() == '3') {
-            Navigator.pushNamed(context, RoutesName.investment_dashboard);
-          }
-          else {
-            Navigator.pushNamed(context, RoutesName.investment_plan);
-          }
-    });*/
-    }
   }
 
   void _initBalance() async {
@@ -856,6 +698,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 }
 
+
+
+
 class FrontCard extends StatefulWidget {
   var balance;
   var accountNumber;
@@ -877,6 +722,9 @@ class _FrontCardState extends State<FrontCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
       color: Colors.white,
       surfaceTintColor: Colors.white,
       child: Padding(
@@ -1097,201 +945,348 @@ class _BackCardState extends State<BackCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.blueGrey,
-      surfaceTintColor: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      color: Colors.transparent,
+      // surfaceTintColor: Colors.white,
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.0),
+              // Same radius as the shape above
+              image: DecorationImage(
+                image: AssetImage('assets/images/real_card_bg.png'),
+                // Replace with your image path
+                fit: BoxFit.fill,
+              ),
+            ),
+            padding: EdgeInsets.only(left: 20.0, right: 6, top: 6,bottom: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'A/c Balance',
-                  style: TextStyle(
-                    fontFamily: 'rupee_ford',
-                    color: ColorPalette.colorPrimary,
-                    fontSize: 9.0,
-                  ),
-                ),
-                Text(
-                  'Account Number',
-                  style: TextStyle(
-                    fontFamily: 'rupee_ford',
-                    color: ColorPalette.colorPrimary,
-                    fontSize: 9.0,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.balance.isEmpty ? "00" : '\u{20B9} ${widget.balance}',
-                  style: TextStyle(
-                    fontFamily: 'rupee_ford',
-                    color: ColorPalette.colorPrimary,
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  widget.accountNumber,
-                  style: TextStyle(
-                    fontFamily: 'rupee_ford',
-                    color: ColorPalette.colorPrimary,
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 8.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'IFSC',
-                  style: TextStyle(
-                    fontFamily: 'rupee_ford',
-                    color: ColorPalette.colorPrimary,
-                    fontSize: 9.0,
-                  ),
-                ),
-                Text(
-                  'Card Number',
-                  style: TextStyle(
-                    fontFamily: 'rupee_ford',
-                    color: ColorPalette.colorPrimary,
-                    fontSize: 9.0,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.ifscCode,
-                  style: TextStyle(
-                    fontFamily: 'rupee_ford',
-                    color: ColorPalette.colorPrimary,
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  widget.cardNumber,
-                  style: TextStyle(
-                    fontFamily: 'rupee_ford',
-                    color: ColorPalette.colorPrimary,
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 8.0,
-            ),
-            Container(
-              height: 1.0,
-              color: ColorPalette.colorPrimary,
-            ),
-            SizedBox(
-              height: 8.0,
-            ),
-            Column(
-              children: [
+                // Antworks Logo
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Set Transaction Limit',
-                      style: TextStyle(
-                        fontFamily: 'rupee_ford',
-                        color: ColorPalette.colorPrimary,
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      margin: EdgeInsets.all(10.0),
+                      child: Image.asset(
+                        'assets/images/antlogo_newpprepaidcard.png',
+                        width: 80.0,
+                        height: 30.0,
+                        fit: BoxFit.contain,
                       ),
                     ),
-                    Text(
-                      'Transaction History',
-                      style: TextStyle(
-                        fontFamily: 'rupee_ford',
-                        color: ColorPalette.colorPrimary,
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      margin: EdgeInsets.all(10.0),
+                      child: Image.asset(
+                        'assets/images/yesbank_logo_new.png',
+                        width: 80.0,
+                        height: 30.0,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            SizedBox(
-              height: 8.0,
-            ),
-            Column(
-              children: [
+
+                // Yes Bank Logo
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Card Activate/Deactivate',
-                      style: TextStyle(
-                        fontFamily: 'rupee_ford',
-                        color: ColorPalette.colorPrimary,
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      margin: EdgeInsets.only(bottom: 4.0),
+                      child: Image.asset(
+                        'assets/images/icon_sim.png',
+                        width: 44.0,
+                        height: 40.0,
+                        fit: BoxFit.contain,
                       ),
                     ),
-                    Text(
-                      'Set/Reset Pin',
-                      style: TextStyle(
-                        fontFamily: 'rupee_ford',
-                        color: ColorPalette.colorPrimary,
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      margin: EdgeInsets.only(bottom: 6.0, right: 10.0),
+                      child: Text(
+                        'AntPay Freedom Card',
+                        style: TextStyle(
+                          fontFamily: 'rupee_ford',
+                          color: Colors.white,
+                          fontSize: 12.0,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/images/powered_by.png',
-                  height: 60.0,
-                  width: 120.0,
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
+
+                Container(
+                  margin: EdgeInsets.only(top: 4.0, bottom: 4.0),
                   child: Text(
-                    'View Virtual Card',
+                    '0000  0000  0000  0000',
                     style: TextStyle(
-                      fontFamily: 'rupee_ford',
-                      color: ColorPalette.colorPrimary,
-                      fontSize: 12.0,
+                      fontFamily: 'creditcard',
+                      color: Colors.white,
+                      fontSize: 20.0,
+                      letterSpacing: 0.06,
                     ),
                   ),
                 ),
+
+                Container(
+                  margin: EdgeInsets.only(top: 4.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'MONTH/YEAR',
+                        style: TextStyle(
+                          fontFamily: 'rupee_ford',
+                          color: Colors.white,
+                          fontSize: 8.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // RuPay Card Logo
+
+                // Valid Though Layout
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    margin: EdgeInsets.only(top: 4.0),
+                    child:  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      //  crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'VALID\n THRU',
+                          style: TextStyle(
+                            fontFamily: 'rupee_ford',
+                            color: Colors.white,
+                            fontSize: 8.0,
+                          ),
+                        ),
+
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '00/00',
+                                style: TextStyle(
+                                  fontFamily: 'creditcard',
+                                  color: Colors.white,
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Validity Date Layout
+
+
+
+
+
+                // Card Holder Details Layout
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(left: 6.0, bottom: 2.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'CARD HOLDER NAME',
+                            style: TextStyle(
+                              fontFamily: 'rupee_ford',
+                              color: Colors.white,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                        ],
+                      ),
+                    ),
+                    Container(
+                      child: Column(
+                        children: [
+
+                          Container(
+                            margin: EdgeInsets.all(10.0),
+                            child: Image.asset(
+                              'assets/images/rupaylogo_card.png',
+                              width: 80.0,
+                              height: 30.0,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+
+
+                        ],
+                      ),
+                    ),
+
+
+
+                  ],
+                ),
+
+
+                Container(
+                  child:  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+
+                      Text(
+                        'CVV  567',
+                        style: TextStyle(
+                          fontFamily: 'rupee_ford',
+                          color: Colors.white,
+                          fontSize: 10.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      Text(
+                        'Hide Your Card',
+                        style: TextStyle(
+                          fontFamily: 'rupee_ford',
+                          color: Colors.white,
+                          fontSize: 10.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.all(10.0),
+                        child: Text(
+                          'Prepaid',
+                          style: TextStyle(
+                            fontFamily: 'rupee_ford',
+                            color: Colors.white,
+                            fontSize: 10.0,
+                          ),
+                        ),
+                      ),
+
+                    ],
+                  ),
+                )
+
+                // Text to Hide Your Card
+
+                // Prepaid Card Heading
+
+
+                // Month/Year Layout
+
+                // Card Number
+
+                // SIM Image
+
+                // AntPay Card Type
               ],
+            ),
+          ),
+         Positioned(
+            bottom: 8,
+            left: 8,
+
+
+           child:  Container(
+           margin: EdgeInsets.only(bottom: 8.0),
+           child:   RotatedBox(quarterTurns: -1, child: Text(  style: TextStyle(
+             fontFamily: 'rupee_ford',
+             color: Colors.white,
+             fontSize: 8.0,
+           ),'For Use Only in India')),
+
+
+           /*  Text(
+                'For Use Only in India',
+                style: TextStyle(
+                  fontFamily: 'rupee_ford',
+                  color: Colors.white,
+                  fontSize: 8.0,
+                    transform: Matrix4.rotationZ(-91 * (3.14159265359 / 180)),
+                ),
+              ),*/
+         ),)
+        ],
+      )
+    );
+  }
+}
+
+class StepCard extends StatelessWidget {
+  final String title;
+  final String content;
+
+  const StepCard({
+    required this.title,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: ColorPalette.lightbluebg,
+      surfaceTintColor: ColorPalette.lightbluebg,
+      margin: EdgeInsets.all(16),
+      elevation: 4,
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 12),
+            Text(content),
+            SizedBox(height: 16),
+            // Add some spacing between the content and the button
+            SizedBox(
+              width: 120,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  textStyle: TextStyle(color: Colors.white),
+                  primary: Colors.red, // Set the background color to red
+                ),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MinVerifyMobile()));
+                  // Add your action when the "Open Now" button is pressed
+                },
+                child:
+                    Text("Proceed Now", style: TextStyle(color: Colors.white)),
+              ),
             ),
           ],
         ),
       ),
     );
   }
+
+
+
+
+
 }
+
+

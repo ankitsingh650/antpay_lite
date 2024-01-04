@@ -16,7 +16,7 @@ class HeaderAlignText extends StatelessWidget {
         child: Text(
           headerText,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.normal,
             color: ColorPalette.textColor,
           ),

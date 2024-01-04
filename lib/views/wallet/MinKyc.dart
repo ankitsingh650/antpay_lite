@@ -1,12 +1,46 @@
+import 'package:antpay_lite/ViewModel/wallet/min_kyc_view_model.dart';
+import 'package:antpay_lite/app_constants.dart';
+import 'package:antpay_lite/model/wallet/PanKYCResponseModel.dart';
 import 'package:antpay_lite/res/color_palette.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_holo_date_picker/date_picker.dart';
+import 'package:provider/provider.dart';
 
-class MinKycScreen extends StatelessWidget {
+import '../../utils/widgets/reusables.dart';
+import '../../utils/widgets/stateless_reusables.dart';
+
+class MinKycScreen extends StatefulWidget {
+  const MinKycScreen({super.key});
+
+  @override
+  State<MinKycScreen> createState() => _MinKycScreenState();
+}
+
+class _MinKycScreenState extends State<MinKycScreen> {
+  late var mynKycViewModel;
+
+  List<String> genderList = ['Male', 'Female'];
+
+  List<String> cityList = ['Delhi', 'Faridabad'];
+
+  List<String> stateList = ['Delhi', 'Haryana'];
+
+
+
+  @override
+  void initState() {
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    mynKycViewModel = Provider.of<MinKycViewModel>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Min Kyc'),
+        surfaceTintColor: ColorPalette.white,
+        title: Text('Min Ac Kyc'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -48,11 +82,33 @@ class MinKycScreen extends StatelessWidget {
                     // ...
 
                     // Example: EditText for Aadhaar Number
-                    TextField(
+
+                    HeaderAlignText(headerText: "Aadhaar Number"),
+                    InputFieldSizedBox(
+                      // controller: widget.mNameController,
+                      // currentFocusNode: widget.mnameFocusNode,
+                      // nextFocusNode: widget.mEmailFocusNode,
+                      hintText: "Enter your Name",
+                      enabled: true,
+                      radius: 8.0,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Enter your Name";
+                        }
+                        if (value.length < 3) {
+                          return "Name too short";
+                        }
+                        return null;
+                      },
+                      keyboardType: TextInputType.text,
+                      context: context,
+                    ),
+
+                    /*    TextField(
                       decoration: InputDecoration(
                         labelText: 'Aadhaar Number',
                       ),
-                    ),
+                    ),*/
 
                     // Example: RadioButton for Aadhaar
                     /*  RadioListTile(
@@ -74,131 +130,245 @@ class MinKycScreen extends StatelessWidget {
                       title: Text('PAN KYC'),
                     ),*/
 
-                    // Gender
-
-                    const Align(
+                    HeaderAlignText(headerText: "Gender"),
+                    Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Gender',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        hint: const Text('Select Gender'),
+                        // value: gender,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        validator: (value) =>
+                            value == null ? 'Select Gender' : null,
+                        items: genderList
+                            ?.map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              );
+                            })
+                            .toSet()
+                            .toList(),
+                        onChanged: (String? value) {
+                          /* setState(() {
+                            gender = value ?? ''; // Ensure it's not null
+                            widget.selectedGender = value;
+                            BasicProfile_details_pageViewModel.setGender(value ?? '');
+                          });*/
+                        },
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Radio(
-                          value: 'male',
-                          groupValue: 'gender',
-                          onChanged: (value) {
-                            // Handle male selection
-                          },
-                        ),
-                        Text(
-                          'Male',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Radio(
-                          value: 'female',
-                          groupValue: 'gender',
-                          onChanged: (value) {
-                            // Handle female selection
-                          },
-                        ),
-                        Text(
-                          'Female',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
                     ),
 
                     // Date of Birth
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Date of Birth',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
+                    HeaderAlignText(headerText: "Date of Birth"),
+                    InkWell(
+                      onTap: () async {
+                        var datePicked = await DatePicker.showSimpleDatePicker(
+                          context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                          dateFormat: "dd-MMMM-yyyy",
+                          looping: true,
+                        );
+
+                        if (datePicked != null) {
+                          // setState(() {
+                          //   widget.mDOBController.text='${datePicked.day}/${datePicked.month}/${datePicked.year}';
+                          // });
+                          // String formattedDate = DateFormat('dd-MM-yyyy').format(datePicked);
+                          // setState(() {
+                          //   widget.mDOBController.text = formattedDate;
+                          // });
+
+                          /*   setState(() {
+                            String formattedDate =
+                            DateFormat('dd/MM/yyyy').format(datePicked);
+                            setState(() {
+                              widget.mDOBController.text = formattedDate;
+                            });
+                          }
+
+                          );*/
+                        }
+                      },
+                      child: SizedBox(
+                        height: 35,
+                        child: TextFormField(
+                          //controller: widget.mDOBController,
+                          enabled: false,
+                          decoration: InputDecoration(
+                            hintText: 'Enter D.O.B',
+                            suffixIcon: const Icon(Icons.calendar_month),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(20.0),
+                              gapPadding: 0.5,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(20.0),
+                              gapPadding: 0.5,
+                            ),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 15),
+                            hintStyle: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          onFieldSubmitted: (value) {},
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.black,
+                          ),
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "Please Enter D.O.B";
+                            }
+                          },
                         ),
                       ),
                     ),
                     // Add your DatePicker widget here
 
                     // Pincode
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Pincode',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        hintText: 'Enter Your Pin Code',
-                      ),
-                      keyboardType: TextInputType.number,
+
+                    HeaderAlignText(headerText: "Pin Code"),
+                    InputFieldSizedBox(
+                      // controller: widget.mNameController,
+                      // currentFocusNode: widget.mnameFocusNode,
+                      // nextFocusNode: widget.mEmailFocusNode,
+                      hintText: "Pin Code",
+                      enabled: true,
+                      radius: 8.0,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Enter your Pincode";
+                        }
+                        if (value.length < 6) {
+                          return "Pincode too short";
+                        }
+                        return null;
+                      },
+                      keyboardType: TextInputType.text,
+                      context: context,
                     ),
 
-                    // State
-                    const Align(
+                    HeaderAlignText(headerText: "Select State"),
+                    Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Select State',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        hint: const Text('Select State'),
+                        // value: city,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        validator: (value) =>
+                            value == null ? 'Select State' : null,
+                        items: stateList
+                            .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              );
+                            })
+                            .toSet()
+                            .toList(),
+                        onChanged: (String? value) {
+                          /*  setState(() {
+                            city = value ?? ''; // Ensure it's not null
+                            widget.selectedGender = value;
+                            BasicProfile_details_pageViewModel.setGender(value ?? '');
+                          });*/
+                        },
                       ),
                     ),
                     // Add your State Dropdown widget here
 
                     // City
-                    const Align(
+                    HeaderAlignText(headerText: "Select City"),
+                    Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Select City',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        hint: const Text('Select City'),
+                        // value: city,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        validator: (value) =>
+                            value == null ? 'Select City' : null,
+                        items: cityList
+                            .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              );
+                            })
+                            .toSet()
+                            .toList(),
+                        onChanged: (String? value) {
+                          /*  setState(() {
+                            city = value ?? ''; // Ensure it's not null
+                            widget.selectedGender = value;
+                            BasicProfile_details_pageViewModel.setGender(value ?? '');
+                          });*/
+                        },
                       ),
                     ),
                     // Add your City Dropdown widget here
 
                     // Address
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Address',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        hintText: 'Enter Your Address',
-                      ),
-                      maxLines: 3,
-                    ),
+                    HeaderAlignText(headerText: "Address"),
+                    InputFieldSizedBox(
+                      // controller: widget.mNameController,
+                      // currentFocusNode: widget.mnameFocusNode,
+                      // nextFocusNode: widget.mEmailFocusNode,
+                      hintText: "Enter your Address",
+                      enabled: true,
+                      radius: 8.0,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Enter your Address";
+                        }
 
+                        return null;
+                      },
+                      keyboardType: TextInputType.text,
+                      context: context,
+                    ),
                     // KYC Disclaimer
+
+                    SizedBox(
+                      height: 10,
+                    ),
+
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Kyc Disclaimer',
+                        AppConstant.disclaimerText,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 12,
@@ -206,9 +376,22 @@ class MinKycScreen extends StatelessWidget {
                       ),
                     ),
 
+                    SizedBox(
+                      height: 20,
+                    ),
                     // Proceed Button
+
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+
+
+                        PanKYCResponseModel responseName = await mynKycViewModel.minKycAadhar( );
+
+                               if (kDebugMode) {
+                                 print(responseName);
+                               }
+
+
                         // Handle button click
                       },
                       child: Text(

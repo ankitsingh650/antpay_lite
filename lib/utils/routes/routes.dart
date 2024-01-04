@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../views/login/login_view.dart';
 import '../../views/login/otp_verify_view.dart';
 import '../../views/onboard/onboarding_view.dart';
+import '../../views/profile/update_profile_view.dart';
 import '../../views/splash/splash_view.dart';
 import 'routes_name.dart';
 
@@ -25,6 +26,12 @@ class Routes {
 
       case RoutesName.paymentFrom:
         return MaterialPageRoute(builder: (BuildContext) =>   BillPaymentScreen());
+
+      case RoutesName.update_profile:
+        return MaterialPageRoute(builder: (BuildContext) =>   UpdateProfileView());
+
+      case RoutesName.offer_view_name:
+        return MaterialPageRoute(builder: (BuildContext) =>   UpdateProfileView());
 
       case RoutesName.verify:
         return MaterialPageRoute(

@@ -79,7 +79,7 @@ class RoutesName {
   static const String investment_redemption_view='investment_redemption_request_view';
 
 
-
+  static const String offer_view_name ='offer_view_name';
 
 
 

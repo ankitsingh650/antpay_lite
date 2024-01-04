@@ -13,6 +13,7 @@ import '../../model/login/user_model.dart';
 import '../../model/login/user_name_model.dart';
 import '../../preferences/session_ manager.dart';
 import '../../provider/DioProvider.dart';
+import '../../repository/common/common_api_repo.dart';
 import '../../repository/login/login_repository.dart';
 import '../../utils/common_utils.dart';
 import '../../utils/routes/routes_name.dart';
@@ -20,6 +21,7 @@ import '../../utils/routes/routes_name.dart';
 class LoginViewModel with ChangeNotifier {
   final _loginRepo = LoginRepository();
   bool _loading = false;
+  CommonApiRepo repoClass = CommonApiRepo();
 
   bool get loading => _loading;
 
@@ -42,15 +44,13 @@ class LoginViewModel with ChangeNotifier {
       setLoading(false);
       print(value.toString());
       saveUserPrefs(value);
-        print("hello::: ${userResponse.data?.imeiNo.toString()}");
-      if(userResponse.status.toString() == '1'){
+      print("hello::: ${userResponse.data?.imeiNo.toString()}");
+      if (userResponse.status.toString() == '1') {
         print('flow chk success');
         Navigator.pushReplacementNamed(context, RoutesName.verify);
-
-      }
-      else{
+      } else {
         print('flow chk failure');
-       // CommonUtils.showSnackBar(userResponse.msg.toString());
+        // CommonUtils.showSnackBar(userResponse.msg.toString());
       }
 
       print(
@@ -61,7 +61,7 @@ class LoginViewModel with ChangeNotifier {
     });
   }
 
- /* submit(String msg, BuildContext context) {
+  /* submit(String msg, BuildContext context) {
     _loginRepo.testSubmit(msg, context);
     CommonUtils.showSnackBar(
         'name: ${loginDetail.name}\nNumber: ${loginDetail.number}', context);
@@ -104,60 +104,21 @@ class LoginViewModel with ChangeNotifier {
   }
 
   Future<String?> fetchMerchantName(String enteredNumber) async {
-    final Dio _dio = Dio();
     String? fetchUserName = "";
     setLoading(true);
-    // final SharedPreferences sp=await SharedPreferences.getInstance();
-    ApiService apiService = ApiService(_dio);
 
     UsernameRequest req = UsernameRequest(mobile: enteredNumber);
+    UsernameResponse response = await repoClass.apiClient.getUsername(req);
 
-    /*  UsernameResponse response1 =
-    await apiService.getUsername(req);
+    print('User Response:\nStatus: \nfname: ${response.fname}');
 
-    print(
-        'APi Response : $response1');*/
-
-    Response response = await _dio.post(
-        "https://antworksmoney.com/apiserver/antapp/getname",
-        data: {'mobile': enteredNumber});
-
-    /*  UsernameResponse response =
-        await apiService.getUsername(req);*/
-
-    /* fname: response.data['fname'];
-    lname: response.data['lname'];*/
-    print('User Response:\nStatus: \nfname: $fetchUserName');
-
-    fetchUserName = "${response.data['fname']} ${response.data['lname']}";
-
-    // fetchUserName = "${response.fname} ${response.lname}";
+    fetchUserName = "${response.fname} ${response.lname}";
 
     setLoading(false);
 
     print('fetchuser: $fetchUserName');
     return fetchUserName;
   }
-
-/*  Future<String> fetchUserName(String enteredNumber) async {
-    String fetchUserName = "";
-    setLoading(true);
-    final SharedPreferences sp = await SharedPreferences.getInstance();
-    Map data = {
-      'mobile': enteredNumber,
-      'referralCode': sp.getString('referralCode') ?? null
-    };
-    await _loginRepo.fetchUser(jsonEncode(data)).then((value) {
-      setLoading(false);
-      print(value.toString());
-      fetchUserName = setUserDetails(value);
-    }).onError((error, stackTrace) {
-      setLoading(false);
-      print(error.toString());
-    });
-    print('fetchuser: $fetchUserName');
-    return fetchUserName;
-  }*/
 
   String setUserDetails(value) {
     FetchUserModel fetchUserModel = FetchUserModel.fromJson(value);
@@ -168,27 +129,4 @@ class LoginViewModel with ChangeNotifier {
     }
     return foundUser;
   }
-
-// setDeviceInformation() async{
-//  final deviceInfo = DeviceInfoSingleton();
-//  await deviceInfo.initialize();
-//
-//  final device = await deviceInfo.getPhoneInfo();
-//  final ipAddress = await deviceInfo.getIPAddress();
-//  final imei = await deviceInfo.getImeiNumber();
-//  final software = await deviceInfo.getPackageInfo();
-//  final currentPosition= await deviceInfo.getCurrentPosition();
-//
-//  deviceInfoModel.ipAddress=await deviceInfo.getIPAddress();
-//  deviceInfoModel.latitude=currentPosition.latitude.toString();
-//  deviceInfoModel.longitude=currentPosition.longitude.toString();
-//  deviceInfoModel.imeiNumber=imei;
-//  deviceInfoModel.versionName=software.version;
-//  deviceInfoModel.versionNumber=software.buildNumber;
-//  deviceInfoModel.modelName=device.manufacturer;
-//  deviceInfoModel.modelNumber=device.model;
-//
-//  print('hello${deviceInfoModel.toString()}');
-//  return deviceInfoModel;
-//  }
 }

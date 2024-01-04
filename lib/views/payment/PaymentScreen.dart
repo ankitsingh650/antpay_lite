@@ -24,6 +24,9 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
   var radioGroupPayment;
 
   var paymentMethod = 0;
+
+  var amount = "0";
+
   TextEditingController _amountController = TextEditingController();
 
   @override
@@ -71,7 +74,7 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
                           ),
                         ),
                         Text(
-                          '₹ ${_amountController.text}',
+                          '₹ ${_amountController.text.isNotEmpty?_amountController.text : amount}',
                           // You may replace this with your actual value
                           style: TextStyle(
                             fontFamily: 'rupee_ford',
@@ -211,7 +214,7 @@ class BillPaymentScreenState extends State<BillPaymentScreen> {
                         Padding(
                           padding: const EdgeInsets.all(0.0),
                           child: Text(
-                            '₹ 1',
+                            '₹ ${_amountController.text.isNotEmpty?_amountController.text : amount}',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.black,

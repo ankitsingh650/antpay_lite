@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'ViewModel/login/login_view_model.dart';
 import 'ViewModel/payment/generateRazorpayorderViewmodel.dart';
 import 'ViewModel/transaction/transaction_history_view_model.dart';
+import 'ViewModel/wallet/min_kyc_view_model.dart';
 import 'preferences/session_ manager.dart';
 import 'views/payment/PaymentScreen.dart';
 
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Antpay',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -61,19 +62,20 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => OtpVerifyViewModel()),
         ChangeNotifierProvider(create: (_) => TransactionHistoryViewModel()),
-
-        ChangeNotifierProvider(create: (_)=> GenerateRazorpayorderViewModel()),
+        ChangeNotifierProvider(create: (_) => MinKycViewModel()),
+        ChangeNotifierProvider(create: (_) => GenerateRazorpayorderViewModel()),
+        ChangeNotifierProvider(create: (_) => MinKycViewModel()),
       ],
       child: MaterialApp(
-        title: 'Antpay Bizhub',
+        debugShowCheckedModeBanner: false,
+        title: 'Antpay Lite',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          //colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
         initialRoute: RoutesName.splash,
