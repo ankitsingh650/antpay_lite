@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:io';
 
+import 'package:url_launcher/url_launcher.dart';
+
 class CommonMethodUtils {
   static final CommonMethodUtils _instance = CommonMethodUtils._internal();
 
@@ -98,15 +100,14 @@ class CommonMethodUtils {
     return null;
   }
 
-  //  Check image url redirect to default browser and external social app
-  /* linkLanuchInBrowser(String url) async {
+ linkLanuchInBrowser(String url) async {
     if (await canLaunch(url)) {
       await launch(url, forceSafariVC: false, forceWebView: false);
     }
     else {
       throw 'Could Not launch $url';
     }
-  }*/
+  }
 
   String showLoanDate(String date) {
     DateTime originalDate = DateTime.parse(date);

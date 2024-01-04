@@ -2,9 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
+import '../../data/retrofit/auth.dart';
 import '../../model/notification/notification_model.dart';
 import '../../preferences/session_ manager.dart';
 import '../../repository/common/common_api_repo.dart';
+import '../../utils/routes/routes_name.dart';
 import '../../utils/widgets/list_view_tile.dart';
 
 class NotificationHistory extends StatefulWidget {
@@ -33,7 +35,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
         title: Container(
           height: 30,
           width: 130,
-          child: Image.asset('assets/images/antpaybizhub_logo.png'),
+          child: Image.asset('assets/images/antpay_logo.png'),
         ),
         backgroundColor: Colors.white,
         actions: <Widget>[
@@ -78,7 +80,7 @@ class _NotificationHistoryState extends State<NotificationHistory> {
                                     child: ListView.builder(
                                         itemBuilder: (context, index) {
                                           return NotificationItemTile(
-                                            onTap: (){
+                                            onTap: (){Navigator.pushReplacementNamed(context, RoutesName.dummy_dash);
                                               print('Notification Clicked');
                                             },
                                             imageUrl: _notifications![index].imgUrl.toString(),
@@ -111,8 +113,15 @@ class _NotificationHistoryState extends State<NotificationHistory> {
 
   void _initNotifications() async{
     CommonApiRepo repoClass = CommonApiRepo();
+    FetchNotificationRequestModel request = FetchNotificationRequestModel(
+      mobile: SessionManager().getMobile().toString(),
 
-    FetchNotificationResponseModel response= await repoClass.getNotifications(SessionManager().getMobile().toString());
+    );
+
+    FetchNotificationResponseModel response= await repoClass.apiClient.fetchNotifications(
+        SessionManager().getToken().toString(),
+        AuthToken.getAuthToken(),
+        request);
 
     if(response.status.toString()=="1"){
       print('List::${response.notificationList}');

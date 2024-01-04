@@ -8,13 +8,13 @@ import 'package:antpay_lite/model/wallet/GetBankDetailsResponseModel.dart';
 import 'package:antpay_lite/model/wallet/WalletBalanceRequestModel.dart';
 import 'package:antpay_lite/model/wallet/WalletBalanceResponseModel.dart';
 import 'package:antpay_lite/views/payment/PaymentScreen.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:provider/provider.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
-
 import '../../data/retrofit/auth.dart';
+import '../../model/homebanner/homebanner.dart';
+import '../../model/homebanner/offers_model.dart';
 import '../../model/wallet/GetBankDetailsRequestModel.dart';
 import '../../preferences/session_ manager.dart';
 import '../../repository/common/common_api_repo.dart';
@@ -44,10 +44,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     Icons.monetization_on,
     Icons.real_estate_agent_outlined
   ];
+
+
+  final List<String> imagePaths = [
+    'assets/images/instant_pay_black.png',
+    'assets/images/to_contact_black.png',
+    'assets/images/to_wallet_black.png',
+    'assets/images/request_money_d.png',
+  ];
+
+
+
   final List<String> icon_name = [
     "Account\nTransfer",
     "Wallet\nTransfer",
-    "Add\nMoney",
+    "  Add\nMoney",
     "Request\nMoney"
   ];
   bool showQR = false;
@@ -58,6 +69,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   String? id;
   String? name;
   String? count;
+  late String offerID;
 
   final String urlFacebook = "https://www.facebook.com/antworksmoney";
   final String urlTwitter = "https://twitter.com/AntworksMoney";
@@ -69,6 +81,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       accountNumber = '00000',
       cardNumber = '0000 0000 0000',
       ifscCode = 'ABCD000';
+
   TextEditingController controller = TextEditingController();
 
   GlobalKey globalKeyQR = new GlobalKey();
@@ -80,6 +93,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   // late KycStatus kycdata;
 
   var investmentViewModel;
+  List<Bannerlist> bannerList=[];
+  late List<Offer>? offersList=[];
+  late List<Results>? offerResultList=[];
+  bool offerViewStatus=false;
 
   void _onButtonPressedApplyLoan() {
     //  _checkLoans();
@@ -109,15 +126,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // _initMerchantCount();
     //  _getSellerDetails();
     //// _initQRData();
+
     _initBalance();
     _fetchCardDetail();
     _fetchAccountDetail();
+    _initOfferDetails();
+    _initOffers();
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
     );
     _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
   }
+
 
   void _toggleCard() {
     setState(() {
@@ -130,6 +151,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       _controller.forward();
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -152,275 +174,62 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       elevation: 2.0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: icons.length,
-                                // Number of items
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: InkWell(
-                                      onTap: () {
-                                        switch (index) {
-                                          case 2:
-
-                                            Navigator.of(context).push(MaterialPageRoute(
-                                              builder: (context) => BillPaymentScreen(),
-                                            ));
-                                            // Navigator.pushReplacementNamed(context, RoutesName.paymentFrom);
-                                           /* PersistentNavBarNavigator
-                                                .pushNewScreen(
-                                              context,
-                                              screen: BillPaymentScreen(),
-                                              withNavBar: false,
-                                              // OPTIONAL VALUE. True by default.
-                                              pageTransitionAnimation:
-                                                  PageTransitionAnimation
-                                                      .cupertino,
-                                            );*/
-                                        }
-                                      },
-                                      child: Column(
-                                        children: [
-                                          CircleAvatar(
-                                            backgroundColor: Colors.blue,
-                                            radius: 30,
-                                            child: Icon(
-                                              icons[index],
-                                              color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: imagePaths.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          switch (index) {
+                                            case 2:
+                                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => BillPaymentScreen(),
+                                              ));
+                                              break;
+                                          }
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(12.0),
+                                              child: Image.asset(
+                                                imagePaths[index],
+                                                width: 30, // Set the width based on your requirements
+                                                height: 30, // Set the height based on your requirements
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(height: 4.0),
-                                          Text(
-                                            icon_name[index],
-                                            style: const TextStyle(
-                                              fontSize: 11.0,
-                                              color: Colors.black,
+                                            const SizedBox(height: 4.0),
+                                            Text(
+                                              icon_name[index],
+                                              style: const TextStyle(
+                                                fontSize: 11.0,
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                                separatorBuilder:
-                                    (BuildContext context, int index) {
-                                  return SizedBox(width: 10);
-                                },
+                                    );
+                                  },
+                                  separatorBuilder: (BuildContext context, int index) {
+                                    return SizedBox(width: 10);
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
                     ),
                   ),
                 ),
-
-                /*  Card(
-                  color: Colors.white,
-                  surfaceTintColor: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'A/c Balance',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                            Text(
-                              'Account Number',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 5.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              balance.isEmpty ? "00" : '\u{20B9} ${balance}',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              accountNumber,
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 8.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'IFSC',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                            Text(
-                              'Card Number',
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 9.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 5.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              ifscCode,
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              cardNumber,
-                              style: TextStyle(
-                                fontFamily: 'rupee_ford',
-                                color: ColorPalette.colorPrimary,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 8.0,
-                        ),
-                        Container(
-                          height: 1.0,
-                          color: ColorPalette.colorPrimary,
-                        ),
-                        SizedBox(
-                          height: 8.0,
-                        ),
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Set Transaction Limit',
-                                  style: TextStyle(
-                                    fontFamily: 'rupee_ford',
-                                    color: ColorPalette.colorPrimary,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Transaction History',
-                                  style: TextStyle(
-                                    fontFamily: 'rupee_ford',
-                                    color: ColorPalette.colorPrimary,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 8.0,
-                        ),
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Card Activate/Deactivate',
-                                  style: TextStyle(
-                                    fontFamily: 'rupee_ford',
-                                    color: ColorPalette.colorPrimary,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Set/Reset Pin',
-                                  style: TextStyle(
-                                    fontFamily: 'rupee_ford',
-                                    color: ColorPalette.colorPrimary,
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Image.asset(
-                              'assets/images/powered_by.png',
-                              height: 60.0,
-                              width: 120.0,
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                'View Virtual Card',
-                                style: TextStyle(
-                                  fontFamily: 'rupee_ford',
-                                  color: ColorPalette.colorPrimary,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),*/
 
                 Container(
                   padding: const EdgeInsets.all(8),
@@ -432,27 +241,212 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       switchOutCurve: Curves.easeInOut,
                       child: _isFrontVisible
                           ? FrontCard(
-                              balance, accountNumber, ifscCode, cardNumber)
+                          balance, accountNumber, ifscCode, cardNumber)
                           : BackCard(
-                              balance, accountNumber, ifscCode, cardNumber),
+                          balance, accountNumber, ifscCode, cardNumber),
                     ),
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 180,bottom: 10),
+                  child: Text(
+                    'Top recommendations',
+                    style: TextStyle(
+                      fontFamily: 'rupee_ford',
+                      color: Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                // Add your ListView here
+                CarouselSlider(
+                  options: CarouselOptions(
+                    enlargeCenterPage: true,
+                    autoPlay: bannerList?.length == 1 ? false : true, // Set autoPlay based on the length of offersList
+                    aspectRatio: 16 / 9,
+                    autoPlayCurve: Curves.fastOutSlowIn,
+                    enableInfiniteScroll: bannerList?.length == 1 ? false : true,
+                    autoPlayAnimationDuration: Duration(milliseconds: 800),
+                    viewportFraction: 1, ),
+                  items: bannerList ?.map((offer) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return InkWell(
+                          onTap: (){
+                            print('offer click id: ${offer.id}');
+                            //Navigator.pushNamed(context, RoutesName.offer_view, arguments: offer);
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(left: 16, right: 16, bottom: 16,),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                                child: Image.network(
+                                  offer.banner_img??'',
+                                  fit: BoxFit.fill,
+                                  loadingBuilder: (BuildContext context, Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        color: ColorPalette.nextButtonColor,
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                                    return Container(
+                                        height: 140,
+                                        width: MediaQuery.of(context).size.width,
+                                        margin: EdgeInsets.only(left: 16, right: 16, bottom: 16,),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(Radius.circular(18)),
+                                            color: CommonUtils.toColor('#CCCCCC'),
+                                            border: Border.all(
+                                              color: Colors.blueGrey, // Set your desired border color
+                                              width: 1, // Set the width of the border
+                                            )
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                              textAlign:TextAlign.center,
+                                              'Error loading image... Sorry for the inconvenience!',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.normal,
+                                                color: Colors.black,
+                                              )
+                                          ),
+                                        )
+                                    );
 
-                // ------>QR Card View End
+                                    //   Image.asset(
+                                    //   'assets/images/surge_banner.png', // Replace with the path to your default image asset.
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover, // Adjust the fit as needed.
+                                    // );
+                                  },
+                                ),
+                              )
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
 
-                /*  Container(
+                Padding(
+                  padding: const EdgeInsets.only(right: 250,bottom: 10),
+                  child: Text(
+                    'Antpay Offer',
+                    style: TextStyle(
+                      fontFamily: 'rupee_ford',
+                      color: Colors.black,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                offersList!.isEmpty?Container():
+                CarouselSlider(
+                  options: CarouselOptions(
+                    enlargeCenterPage: true,
+                    autoPlay: offersList?.length == 1 ? false : true, // Set autoPlay based on the length of offersList
+                    aspectRatio: 16 / 9,
+                    autoPlayCurve: Curves.fastOutSlowIn,
+                    enableInfiniteScroll: offersList?.length == 1 ? false : true,
+                    autoPlayAnimationDuration: Duration(milliseconds: 800),
+                    viewportFraction: 1, ),
+                  items: offersList?.map((offer) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return InkWell(
+                          onTap: (){
+                            print('offer click id Anpay: ${offer.id}');
+                            Navigator.pushNamed(context, RoutesName.offer_view_name, arguments: offer);
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(left: 16, right: 16, bottom: 16,),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                                child: Image.network(
+                                  offer.offerBannerImg??'',
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (BuildContext context, Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        color: ColorPalette.nextButtonColor,
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                                    return Container(
+                                        height: 140,
+                                        width: MediaQuery.of(context).size.width,
+                                        margin: EdgeInsets.only(left: 16, right: 16, bottom: 16,),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(Radius.circular(18)),
+                                            color: CommonUtils.toColor('#CCCCCC'),
+                                            border: Border.all(
+                                              color: Colors.blueGrey, // Set your desired border color
+                                              width: 1, // Set the width of the border
+                                            )
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                              textAlign:TextAlign.center,
+                                              'Error loading image... Sorry for the inconvenience!',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.normal,
+                                                color: Colors.black,
+                                              )
+                                          ),
+                                        )
+                                    );
+
+                                    //   Image.asset(
+                                    //   'assets/images/surge_banner.png', // Replace with the path to your default image asset.
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover, // Adjust the fit as needed.
+                                    // );
+                                  },
+                                ),
+                              )
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+                Container(
                   margin: EdgeInsets.only(top: 16),
+                  height: 130,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border(
                       top: BorderSide(
                         color: ColorPalette.bottomIconSelectedColor,
-                        width: 3,
+                        width: 2,
                       ),
                       bottom: BorderSide(
                         color: Colors.red,
-                        width: 3,
+                        width: 2,
                       ),
                     ),
                   ),
@@ -462,8 +456,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         decoration: TextDecoration.underline,
-                        decorationThickness: 2,
-                        fontSize: 16,
+                        decorationThickness: 1.5,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -474,313 +468,81 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: GestureDetector(
-                           */ /* onTap: () => CommonMethodUtils().linkLanuchInBrowser(urlFacebook),
+                            onTap: () => CommonMethodUtils()
+                                .linkLanuchInBrowser(urlFacebook),
                             child: Image.asset(
-                              'assets/images/fb_icon.png',
-                              height: 50,
-                              width: 50,
-                            ),*/ /*
+                              'assets/images/facebook.png',
+                              height: 40,
+                              width: 40,
+                            ),
                           ),
                         ),
-                      */ /*  Padding(
+                        Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: GestureDetector(
                             onTap: () => CommonMethodUtils()
                                 .linkLanuchInBrowser(urlTwitter),
                             child: Image.asset(
-                              'assets/images/twitter_icon.png',
-                              height: 50,
-                              width: 50,
+                              'assets/images/twitterx.png',
+                              height: 40,
+                              width: 40,
                             ),
                           ),
-                        ),*/ /*
-                      */ /*  Padding(
+                        ),
+                        Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: GestureDetector(
                             onTap: () => CommonMethodUtils()
                                 .linkLanuchInBrowser(urlLinkedln),
                             child: Image.asset(
-                              'assets/images/linkedin_icon.png',
-                              height: 50,
-                              width: 50,
+                              'assets/images/linkedin.png',
+                              height: 40,
+                              width: 40,
                             ),
                           ),
-                        ),*/ /*
+                        ),
                       ],
                     ),
+
                     Text(
-                      'CIN: U67200HR2012PTC046705 |  Email ID: support@antworksmoney.com |  Copyrights © Antworks Money 2017-2021.All Rights Reserved.',
+                      'ANTWORKS FINANCIAL BUDDY TECHNOLOGIES PVT.LTD.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 10,
+                        decorationThickness: 2,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+
+                    Text(
+                      'CIN: U67200HR2012PTC046705 |  Email ID: support@antworksmoney.com   Copyrights © Antworks Money 2017-2024.All Rights Reserved.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 9,
                           color: Colors.grey,
                           fontWeight: FontWeight.bold),
                     ),
+
+
+
                   ]),
-                ),*/
+                ),
               ]),
+
+
             ),
           ),
         ));
   }
 
-  void _getSellerDetails() async {
-    CommonApiRepo repoClass = CommonApiRepo();
 
-    /*  late MerchantDetails details;
-    MerchantDataModel data = await repoClass.fetchMerchantDetails(SessionManager().getToken().toString(), AuthToken.getAuthToken(), SessionManager().getMobile().toString());
-
-    if (data.status.toString() == "1") {
-      details = data.details!;
-      sellerDetails = data.sellerDetails;
-
-      if (sellerDetails != null) {
-        print(sellerDetails.toString());
-        if(sellerDetails!.qrStringStatus.toString()=='0'){
-          setState(() {
-            print('Seller under verification process');
-            merchantStatus=false;
-          });
-        }
-        else{
-          print('Seller verification done');
-          merchantStatus=true;
-        }
-      } else {
-        CommonUtils.showToast("Seller not Activated!");
-      }
-    }*/
-  }
-
-  Future<void> _captureAndSharePng() async {
-    if (!qrData!.isEmpty) {
-      /*   try {
-        RenderRepaintBoundary boundary = globalKeyQR.currentContext!
-            .findRenderObject() as RenderRepaintBoundary;
-
-        // capturing the QR image
-        var image = await boundary.toImage();
-        ByteData? byteData =
-            await image.toByteData(format: ImageByteFormat.png);
-        Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-        //app directory for storing images.
-        // final appDir = await getApplicationDocumentsDirectory();
-        final tempDir = await getTemporaryDirectory();
-        final file = await new File('${tempDir.path}/qr_image.png').create();
-        //appending data as bytes
-        await file.writeAsBytes(pngBytes);
-
-        // final channel = const MethodChannel('channel:me.alfian.share/share');
-        // channel.invokeMethod('shareFile', 'image.png');
-
-        //Sharing QR
-        await Share.shareFiles(
-          [file!.path],
-          mimeTypes: ["image/png"],
-          text: "Share the QR Code",
-        );
-      } catch (e) {
-        print(e.toString());
-      }
-    } else {
-      CommonUtils.showToast("Invalid QR!");
-    }*/
-    }
-
-    void _initQRData() async {
-      CommonApiRepo repoClass = CommonApiRepo();
-      /* FetchQrRequestModel request =
-        FetchQrRequestModel(mobile: SessionManager().getMobile().toString());
-
-    FetchQrResponseModel response;
-    if(EnvironmentConfig().envStatus.toString()=='PROD'){
-      print('Fetch QR call production');
-      response =
-      await repoClass.fetchQR(SessionManager().getToken().toString(), AuthToken.getAuthToken(),  request);
-    }
-    else {
-      print('Fetch QR call dev');
-      response =
-      await repoClass.fetchQR_UAT(AuthToken.getAuthToken(), request);
-    }
-
-    if (response.status.toString() == "SUCCESS") {
-      switch (response.responseCode) {
-        case "P001":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P002":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P005":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P006":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS004":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS026":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS030":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "00":
-          setState(() {
-            qrData = response.qrString.toString();
-            id=response.vpa.toString();
-            name=response.qrString.toString().split('pn=')[1];
-            activated = true;
-          });
-          break;
-        default:
-          CommonUtils.showFlushBar("Network Error!", context);
-      }
-    } else {
-      CommonUtils.showToast(response.responseMessage.toString());
-      qrData = "";
-    }*/
-    }
-
-    void _initBalance() async {
-      CommonApiRepo repoClass = CommonApiRepo();
-      /* FetchSellerBalanceRequestModel request = FetchSellerBalanceRequestModel(
-        mobile: SessionManager().getMobile().toString());
-
-    FetchSellerBalanceResponseModel response;
-
-    if(EnvironmentConfig().envStatus.toString()=='PROD'){
-      print('Fetch Balance call production');
-      response =
-      await repoClass.fetchBalance(SessionManager().getToken().toString(), AuthToken.getAuthToken(), request);
-    }
-    else {
-      print('Fetch Balance call dev');
-      response =
-      await repoClass.fetchBalance_UAT(AuthToken.getAuthToken(), request);
-    }
-
-
-    if (response.status.toString() == "SUCCESS") {
-      switch (response.responseCode) {
-        case "P001":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P002":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P005":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "P006":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS004":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS026":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "PS031":
-          CommonUtils.showFlushBar(
-              response.responseMessage.toString(), context);
-          break;
-        case "00":
-          print(
-              'Response:${response.currentBalance}\n${response.withdrawableBalance}\n${response.monthlyLimitUtilized}');
-          setState(() {
-            List amount = response.currentBalance.toString().split(".");
-            balance = amount[0];
-            balanceDecimal = amount[1];
-          });
-          break;
-        default:
-          CommonUtils.showFlushBar("Server Error!", context);
-      }
-    } else {
-      //handle if not registered as seller
-    }*/
-    }
-
-    void _checkLoans() async {
-      print(SessionManager().getMobile().toString());
-      /*  LoanHistoryRequestModel requestModel= LoanHistoryRequestModel(
-        mobile: SessionManager().getMobile().toString(),
-        source: 'Bizhub'
-    );
-
-    CommonApiRepo repoClass = CommonApiRepo();
-    LoanHistoryResponseModel response = await repoClass.fetchLoanHistory(SessionManager().getToken().toString(), AuthToken.getAuthToken(), requestModel);
-
-    if(response.status.toString()=="1"){
-      Navigator.pushNamed(context, RoutesName.business_loan_history);
-    }
-    else{
-      Navigator.pushNamed(context, RoutesName.business_loan);
-    }*/
-    }
-
-/*  Future openShareQRDialog(bool isShare) => showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0)), //this right here
-            child: MerchantQR(globalKeyShareQR, qrData??'Unknown', id??'Loading...', name??'Loading...', isShare, false, '')
-        );
-      });*/
-
-    void _initMerchantCount() async {
-      CommonApiRepo repoClass = CommonApiRepo();
-      /* MerchantCount response = await repoClass.fetchMerchantCount(SessionManager().getToken().toString(), AuthToken.getAuthToken());
-    if(response.status.toString()=="1"){
-      setState(() {
-        count=response.merchantCount.toString();
-      });
-    }*/
-    }
-
-    Future<void> _getInvestmentSchemes() async {
-      //   investmentViewModel.setLoading(true);
-/*    SchemesInvestmentResponseModel schemesInvestmentResponseModel =
-    await investmentViewModel.getInvestmentSchemes();
-    responseSchemsList = schemesInvestmentResponseModel.schemesList;
-    //  this flow executes on the scheme api response kycStatus step according
-
-
-    kycdata = schemesInvestmentResponseModel.kyc_status!;
-    setState(() {
-      if (kycdata.step.toString() == '3') {
-            Navigator.pushNamed(context, RoutesName.investment_dashboard);
-          }
-          else {
-            Navigator.pushNamed(context, RoutesName.investment_plan);
-          }
-    });*/
-    }
-  }
 
   void _initBalance() async {
     CommonApiRepo repoClass = CommonApiRepo();
     WalletBalanceRequestModel request = WalletBalanceRequestModel(
-        actionName: 'WALLETBAL', p1: SessionManager().getMobile().toString());
+        actionName: 'WALLETBAL',
+        p1: SessionManager().getMobile().toString());
 
     WalletBalanceResponseModel response;
 
@@ -819,13 +581,66 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       print('Response:${response.message}');
       setState(() {
         cardNumber = response.cardNumber.toString();
-
-        /*   List amount = response.balance.toString().split(".");
-        balance = amount[0];
-        balanceDecimal = amount[1];*/
       });
     } else {
       //handle if not registered as seller
+    }
+  }
+
+  void _initOffers() async{
+    CommonApiRepo repoClass = CommonApiRepo();
+    OfferResponse response = await repoClass.apiClient.getOffers();
+    if (response.status.toString() == "1") {
+      offerResultList=response.results;
+      if(offerResultList!.isEmpty){
+        setState(() {
+          offerViewStatus=false;
+
+        });
+      }
+      else{
+        setState(() {
+          offerViewStatus=true;
+          if(offersList!.isNotEmpty){
+            offersList!.clear();
+          }
+          for (Results result in offerResultList!) {
+            print(result.imgURL);
+            List<Offer>? currentResultOfferList=result!.offer;
+            for(Offer offer in currentResultOfferList!){
+              Offer currOffer=Offer(
+                id: offer.id,
+                offerName: offer.offerName,
+                offerType: offer.offerType,
+                couponCodeType: offer.couponCodeType,
+                offerIconImg: offer.offerIconImg,
+                offerBannerImg: "${result.imgURL}${offer.offerBannerImg}",
+                companyIconImg: offer.companyIconImg,
+                offerUrl: offer.offerUrl,
+                appId: offer.appId,
+                playStoreURL: offer.playStoreURL,
+                status: offer.status,
+              );
+              offersList?.add(currOffer);
+            }
+          }
+          print("no of offers: ${offersList?.length}");
+        });
+      }
+    }
+  }
+
+  void _initOfferDetails() async {
+    CommonApiRepo repoClass = CommonApiRepo();
+    HomebannerModel response;
+    response = await repoClass.apiClient.Homebanner();
+    if (response.status.toString() == "1") {
+      print('Response:${response.banner_list}');
+      setState(() {
+        bannerList=response.banner_list!;
+      });
+    } else {
+
     }
   }
 
@@ -854,6 +669,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       //handle if not registered as seller
     }
   }
+
+
+
 }
 
 class FrontCard extends StatefulWidget {
@@ -863,11 +681,11 @@ class FrontCard extends StatefulWidget {
   var cardNumber;
 
   FrontCard(
-    this.balance,
-    this.accountNumber,
-    this.ifscCode,
-    this.cardNumber,
-  );
+      this.balance,
+      this.accountNumber,
+      this.ifscCode,
+      this.cardNumber,
+      );
 
   @override
   State<FrontCard> createState() => _FrontCardState();
@@ -1069,10 +887,46 @@ class _FrontCardState extends State<FrontCard> {
                 ),
               ],
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              // children: [
+              //   Padding(
+              //     padding: const EdgeInsets.all(1.0),
+              //     child: Image.network("",
+              //       loadingBuilder: (BuildContext context, Widget child,
+              //           ImageChunkEvent? loadingProgress) {
+              //         if (loadingProgress == null) {
+              //           return child;
+              //         }
+              //         else {
+              //           return Center(
+              //             child: Image(
+              //               image: const AssetImage(
+              //                   'assets/images/loader_image.gif'),
+              //               width: MediaQuery
+              //                   .of(context)
+              //                   .size
+              //                   .width * 0.15,
+              //               height: MediaQuery
+              //                   .of(context)
+              //                   .size
+              //                   .height * 0.10,
+              //             ), // You can replace this with your loader GIF widget.
+              //           );
+              //         }
+              //       },
+              //     ),
+              //   ),
+              // ],
+
+            ),
           ],
         ),
+
       ),
+
     );
+
   }
 }
 
@@ -1083,11 +937,11 @@ class BackCard extends StatefulWidget {
   var cardNumber;
 
   BackCard(
-    this.balance,
-    this.accountNumber,
-    this.ifscCode,
-    this.cardNumber,
-  );
+      this.balance,
+      this.accountNumber,
+      this.ifscCode,
+      this.cardNumber,
+      );
 
   @override
   State<BackCard> createState() => _BackCardState();
@@ -1289,9 +1143,24 @@ class _BackCardState extends State<BackCard> {
                 ),
               ],
             ),
+
+
           ],
+
+
+
         ),
       ),
     );
+
+
+
   }
+
+
+
+
 }
+
+
+

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -138,9 +139,6 @@ class _ProfileState extends State<Profile> {
                   ),
                   child: Column(
                     children: [
-
-
-
                       ProfileListItemTile(
                         imagePath: 'assets/images/my_account.png',
                         text: 'My Account',
@@ -210,8 +208,12 @@ class _ProfileState extends State<Profile> {
                           print("logout");
                           SessionManager().logOutUser();
                           UtilityPreferences().setString('isOnboarded', 'true');
-                          Navigator.of(context, rootNavigator: true)
-                              .pushReplacementNamed(RoutesName.login);
+                          Navigator.restorablePushReplacementNamed(context, RoutesName.login);
+
+                          // Navigator.of(context, rootNavigator: true)
+                          //     .pushReplacementNamed(RoutesName.login);
+                          //
+
                           // to push to new screen without bottom bar
                           // PersistentNavBarNavigator.pushNewScreen(
                           //   context,

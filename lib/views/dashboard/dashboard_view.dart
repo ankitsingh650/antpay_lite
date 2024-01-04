@@ -5,7 +5,8 @@ import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import '../../res/color_palette.dart';
 import '../../utils/routes/routes.dart';
 import '../nav/home.dart';
-import '../transaction/transaction_history_view.dart';
+import '../nav/transaction_history_view.dart';
+import '../transaction/notification_history.dart';
 
 class DummyDashboard extends StatefulWidget {
   const DummyDashboard({Key? key}) : super(key: key);
@@ -67,6 +68,13 @@ class _DummyDashboardState extends State<DummyDashboard> {
               onPressed: () {
                 // do something
                 print('Bell Icon');
+                PersistentNavBarNavigator.pushNewScreen(
+                  context,
+                  screen: NotificationHistory(),
+                  withNavBar: true, // OPTIONAL VALUE. True by default.
+                  pageTransitionAnimation: PageTransitionAnimation.cupertino,
+                );
+
               },
             ),
           )
@@ -74,20 +82,6 @@ class _DummyDashboardState extends State<DummyDashboard> {
       ),
 
       body: _pages[_selectedIndex],
-     /* body: PersistentTabView(
-        context,
-        controller: _controller,
-        screens: _pages,
-        items: _navBarItems(),
-        backgroundColor: Colors.white,
-        handleAndroidBackButtonPress: true,
-        resizeToAvoidBottomInset: false,
-        navBarStyle: NavBarStyle.style13,
-        hideNavigationBarWhenKeyboardShows: true,
-        confineInSafeArea: true,
-        // Choose the style you want
-      ),*/
-
       bottomNavigationBar: BottomNavigationBar(
         elevation: 2,
         currentIndex:  _selectedIndex,

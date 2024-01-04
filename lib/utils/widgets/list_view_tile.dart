@@ -1513,9 +1513,9 @@ class _NotificationItemTileState extends State<NotificationItemTile> {
             children: [
               Center(
                 child: Container(
-                  height: 50,
-                  width: 50,
-                  margin: const EdgeInsets.only(top: 12, bottom: 12, left: 20),
+                  height: 55,
+                  width: 85,
+                  margin: const EdgeInsets.only(top: 10, bottom: 10, left: 15),
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
 

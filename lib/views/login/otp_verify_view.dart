@@ -431,11 +431,11 @@ class _VerifyOtpViewState extends State<VerifyOtpView>
     String nextScreen = await otpVerifyViewModel.verifyOTP(number, otp);
     print('no: $number\notp: $otp :$nextScreen');
     if (nextScreen == 'Profile_page') {
-       Navigator.pushNamed(context, RoutesName.dashboard);
+       Navigator.pushNamed(context, RoutesName.update_profile);
       Map<String, dynamic> passScreenData = {
           'fromScreen': 'login',
         };
-      Navigator.pushReplacementNamed(context, RoutesName.dashboard, arguments: passScreenData);
+      Navigator.pushReplacementNamed(context, RoutesName.update_profile, arguments: passScreenData);
     }
   }
 }

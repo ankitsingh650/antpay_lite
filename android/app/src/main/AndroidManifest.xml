@@ -6,7 +6,7 @@
 
 
     <application
-        android:label="antpay_lite"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/launch_image">
 

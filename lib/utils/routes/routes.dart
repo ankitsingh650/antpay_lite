@@ -1,8 +1,11 @@
 import 'package:antpay_lite/views/dashboard/dashboard_view.dart';
 import 'package:antpay_lite/views/payment/PaymentScreen.dart';
 import 'package:flutter/material.dart';
+import '../../views/dashboard/offer_view.dart';
 import '../../views/login/login_view.dart';
 import '../../views/login/otp_verify_view.dart';
+import '../../views/login/update_profile_view.dart';
+import '../../views/login/update_profile_view.dart';
 import '../../views/onboard/onboarding_view.dart';
 import '../../views/splash/splash_view.dart';
 import 'routes_name.dart';
@@ -29,6 +32,14 @@ class Routes {
       case RoutesName.verify:
         return MaterialPageRoute(
             builder: (BuildContext) => const VerifyOtpView());
+
+      case RoutesName.update_profile:
+        return MaterialPageRoute(
+            builder: (BuildContext) => const UpdateProfileView());
+
+      case RoutesName.offer_view_name:
+        return MaterialPageRoute(
+            builder: (BuildContext) => const OfferView(), settings: settings);
 
       default:
         return MaterialPageRoute(builder: (_) {

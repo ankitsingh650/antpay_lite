@@ -6,74 +6,63 @@ part of 'transaction_history_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-fetchStatementRequestModel _$fetchStatementRequestModelFromJson(
+TransactionHistoryRequestModel _$TransactionHistoryRequestModelFromJson(
         Map<String, dynamic> json) =>
-    fetchStatementRequestModel(
+    TransactionHistoryRequestModel(
       mobile: json['mobile'] as String?,
-      txnStartDate: json['p2'] as String?,
-      txnEndDate: json['p3'] as String?,
-      pageNo: json['p4'] as String?,
     );
 
-Map<String, dynamic> _$fetchStatementRequestModelToJson(
-        fetchStatementRequestModel instance) =>
+Map<String, dynamic> _$TransactionHistoryRequestModelToJson(
+        TransactionHistoryRequestModel instance) =>
     <String, dynamic>{
       'mobile': instance.mobile,
-      'p2': instance.txnStartDate,
-      'p3': instance.txnEndDate,
-      'p4': instance.pageNo,
     };
 
-fetchStatementResponseModel _$fetchStatementResponseModelFromJson(
+TransactionHistoryResponseModel _$TransactionHistoryResponseModelFromJson(
         Map<String, dynamic> json) =>
-    fetchStatementResponseModel(
-      requestId: json['requestId'] as String?,
-      status: json['status'] as String?,
-      responseCode: json['responseCode'],
-      responseMessage: json['responseMessage'] as String?,
-      transactionList: (json['transactionsList'] as List<dynamic>?)
-          ?.map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
+    TransactionHistoryResponseModel(
+      transaction_list: (json['transaction_list'] as List<dynamic>?)
+          ?.map(
+              (e) => TransactionHistorylist.fromJson(e as Map<String, dynamic>))
           .toList(),
+      status: json['status'],
+      msg: json['msg'] as String?,
     );
 
-Map<String, dynamic> _$fetchStatementResponseModelToJson(
-        fetchStatementResponseModel instance) =>
+Map<String, dynamic> _$TransactionHistoryResponseModelToJson(
+        TransactionHistoryResponseModel instance) =>
     <String, dynamic>{
-      'requestId': instance.requestId,
+      'transaction_list': instance.transaction_list,
       'status': instance.status,
-      'responseCode': instance.responseCode,
-      'responseMessage': instance.responseMessage,
-      'transactionsList': instance.transactionList,
+      'msg': instance.msg,
     };
 
-TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
-    TransactionModel(
-      transactionDate: json['transactionDate'] as String?,
-      transactionReferenceNumber: json['transactionReferenceNumber'] as String?,
-      transactionType: json['transactionType'] as String?,
-      transactionSubType: json['transactionSubType'] as String?,
-      transactionAmount: json['transactionAmount'],
-      commission: json['commission'] as String?,
-      settlementAmount: json['settlementAmount'],
-      settlementStatus: json['settlementStatus'] as String?,
-      settlementMode: json['settlementMode'] as String?,
-      settlementUTRNumber: json['settlementUTRNumber'] as String?,
-      sender: json['sender'] as String?,
-      senderVpa: json['senderVpa'] as String?,
+TransactionHistorylist _$TransactionHistorylistFromJson(
+        Map<String, dynamic> json) =>
+    TransactionHistorylist(
+      transaction_no: json['transaction_no'] as String?,
+      transaction_type: json['transaction_type'] as String?,
+      app_user_mobile: json['app_user_mobile'],
+      recharge_no: json['recharge_no'] as String?,
+      amount: json['amount'] as String?,
+      payment_method: json['payment_method'] as String?,
+      status: json['status'] as String?,
+      ResposneMessage: json['ResposneMessage'] as String?,
+      antworksService: json['antworksService'] as String?,
+      created_at: json['created_at'] as String?,
     );
 
-Map<String, dynamic> _$TransactionModelToJson(TransactionModel instance) =>
+Map<String, dynamic> _$TransactionHistorylistToJson(
+        TransactionHistorylist instance) =>
     <String, dynamic>{
-      'transactionDate': instance.transactionDate,
-      'transactionReferenceNumber': instance.transactionReferenceNumber,
-      'transactionType': instance.transactionType,
-      'transactionSubType': instance.transactionSubType,
-      'transactionAmount': instance.transactionAmount,
-      'commission': instance.commission,
-      'settlementAmount': instance.settlementAmount,
-      'settlementStatus': instance.settlementStatus,
-      'settlementMode': instance.settlementMode,
-      'settlementUTRNumber': instance.settlementUTRNumber,
-      'sender': instance.sender,
-      'senderVpa': instance.senderVpa,
+      'transaction_no': instance.transaction_no,
+      'transaction_type': instance.transaction_type,
+      'app_user_mobile': instance.app_user_mobile,
+      'recharge_no': instance.recharge_no,
+      'amount': instance.amount,
+      'payment_method': instance.payment_method,
+      'status': instance.status,
+      'ResposneMessage': instance.ResposneMessage,
+      'antworksService': instance.antworksService,
+      'created_at': instance.created_at,
     };

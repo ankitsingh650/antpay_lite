@@ -80,7 +80,7 @@ class RoutesName {
 
 
 
-
+  static const String offer_view_name='offer_view';
 
 
 

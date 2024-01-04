@@ -4,6 +4,11 @@ import 'package:antpay_lite/preferences/utility_preferences.dart';
 import 'package:antpay_lite/utils/routes/routes.dart';
 import 'package:antpay_lite/utils/routes/routes_name.dart';
 import 'package:antpay_lite/views/dashboard/dashboard_view.dart';
+import 'package:antpay_lite/views/dashboard/offer_view.dart';
+import 'package:antpay_lite/views/dashboard/offer_view_model.dart';
+import 'package:antpay_lite/views/login/BasicProfile_details_page.dart';
+import 'package:antpay_lite/views/login/ExtendedProfile_details_page.dart';
+import 'package:antpay_lite/views/login/update_profile_view.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -67,8 +72,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => OtpVerifyViewModel()),
         ChangeNotifierProvider(create: (_) => TransactionHistoryViewModel()),
-
         ChangeNotifierProvider(create: (_)=> GenerateRazorpayorderViewModel()),
+        ChangeNotifierProvider(create: (_)=> GenerateRazorpayorderViewModel()),
+        ChangeNotifierProvider(create: (_)=> OfferViewModel()),
+        //ChangeNotifierProvider(create: (_)=> UpdateProfileViewState()),
+
       ],
       child: MaterialApp(
         title: 'Antpay Bizhub',
